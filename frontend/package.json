@@ -1,0 +1,11 @@
+{
+  "name": "dipeck-frontend",
+  "version": "0.0.1",
+  "scripts": {
+    "lint": "eslint . && htmlhint ."
+  },
+  "dependencies": {
+    "eslint": "^4.19.1",
+    "htmlhint": "0.9.13"
+  }
+}

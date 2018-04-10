@@ -4,9 +4,10 @@ matrix:
     - language: node_js
       node_js:
         - "9.11"
-      before_script:
+      before_install:
         - cd frontend
       script:
-        - npm install htmllint-cli eslint
-        - ./node_modules/.bin/eslint .
-        - ./node_modules/.bin/htmllint .
+        - npm run lint
+cache:
+  directories:
+    - "frontend/node_modules"
