@@ -1,7 +1,7 @@
  Dipeck
 ========
 
-The **di**stributed **p**rime ch**eck**er**.**
+**The **di**stributed **p**rime ch**eck**er**
 
 This is a test project to play around with:
  - Containerization and microservices
@@ -10,8 +10,7 @@ This is a test project to play around with:
  - CI and CD
  - *Actually seeing a project through*
 
-The goal is simple enough:
-
+## The goal
 >  Create an over-engineered web-app for checking whether a number is prime
 
 ## The services
