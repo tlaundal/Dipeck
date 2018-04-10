@@ -1,7 +1,7 @@
  Dipeck
 ========
 
-**The **di**stributed **p**rime ch**eck**er**
+**The *di*stributed *p*rime ch*eck*er**
 
 This is a test project to play around with:
  - Containerization and microservices
