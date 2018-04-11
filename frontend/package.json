@@ -2,7 +2,7 @@
   "name": "dipeck-frontend",
   "version": "0.0.1",
   "scripts": {
-    "lint": "eslint . && htmlhint ."
+    "lint": "eslint ./src/ && htmlhint ./src/"
   },
   "dependencies": {
     "eslint": "^4.19.1",
