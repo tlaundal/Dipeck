@@ -1,4 +1,4 @@
-matrix:
+jobs:
   # We have to put our configurations here, so we can separate the directories
   include:
     - language: node_js
@@ -8,6 +8,17 @@ matrix:
         - cd frontend
       script:
         - npm run lint
+    - language: python
+      python:
+        - "3.6"
+      before_install:
+        - cd request
+      install:
+        - pip install -r requirements.txt
+        - pip install flake8
+      script:
+        - flake8
+        - pip install .
 cache:
   directories:
     - "frontend/node_modules"
