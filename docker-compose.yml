@@ -1,0 +1,19 @@
+version: "3.2"
+
+networks:
+  ntwrk: {}
+services:
+  request:
+    build: ./request/
+    expose:
+      - "5000"
+    networks:
+      - ntwrk
+  frontend:
+    build: ./frontend/
+    depends_on:
+      - request
+    ports:
+      - "80:80"
+    networks:
+      - ntwrk
