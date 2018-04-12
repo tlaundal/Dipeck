@@ -1,6 +1,6 @@
 from flask import request
 from .dipeck_request import app, cache, message_queue
-from .utils import jsonify
+from .utils import jsonify, parse_number
 
 
 @app.route('/')
@@ -12,27 +12,15 @@ def status():
 @app.route('/is-prime')
 @jsonify
 def is_prime():
-    arg = request.args.get('num', None)
-    if arg is None:
-        return {'type': 'error', 'code': 1, 'message': 'No argument'}, 400
+    res = parse_number(request.args.get('num', None))
+    if not res[0]:
+        return {'type': 'error', 'code': res[1], 'message': res[2]}
 
-    try:
-        arg = int(arg)
-    except ValueError:
-        return {
-            'type': 'error',
-            'code': 2,
-            'message': 'Argument was not number'
-        }, 400
+    arg = res[1]
 
     if cache.contains(arg):
         is_prime = cache.get(arg)
-        return {
-            'type': 'result',
-            'result': is_prime
-        }
+        return {'type': 'result', 'result': is_prime}
     else:
         message_queue.enqueue(arg)
-        return {
-            'type': 'enqueued'
-        }
+        return {'type': 'enqueued'}

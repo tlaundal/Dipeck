@@ -12,3 +12,14 @@ def jsonify(f):
             res = res[0]
         return f_jsonify(res), code
     return wrapped
+
+
+def parse_number(arg):
+    if arg is None:
+        return False, 1, 'No argument supplied'
+
+    try:
+        num = int(arg)
+        return True, num
+    except ValueError:
+        return False, 2, 'Argument was not a number'
