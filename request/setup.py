@@ -7,5 +7,6 @@ setup(
         'flask',
         'Flask-Env',
         'pika',
+        'redis'
     ],
 )

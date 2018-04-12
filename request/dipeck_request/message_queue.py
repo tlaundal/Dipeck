@@ -28,7 +28,7 @@ class MessageQueue:
                                           body=str(num))
 
     def register_teardown(self, app):
-        def teardown():
+        def teardown(error):
             if hasattr(g, 'mq'):
                 g.mq.close()
 

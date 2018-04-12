@@ -1,6 +1,11 @@
 version: "3.2"
 
 services:
+  cache:
+    image: redis:3.2.11
+    expose:
+      - "6379"
+
   message_queue:
     image: rabbitmq:3.7.4
     hostname: message_queue
@@ -14,10 +19,12 @@ services:
     build: ./request/
     depends_on:
       - message_queue
+      - cache
     environment:
       DIPECK_MQ_HOST: "message_queue"
       DIPECK_MQ_USER: "message_queue_user"
       DIPECK_MQ_PASS: "EJWSYRYNNtqDkd4V"
+      DIPECK_CACHE_HOST: "cache"
     expose:
       - "5000"
 
