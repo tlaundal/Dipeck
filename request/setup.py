@@ -5,5 +5,7 @@ setup(
     packages=['dipeck_request'],
     install_requires=[
         'flask',
+        'Flask-Env',
+        'pika',
     ],
 )

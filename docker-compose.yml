@@ -1,19 +1,29 @@
 version: "3.2"
 
-networks:
-  ntwrk: {}
 services:
+  message_queue:
+    image: rabbitmq:3.7.4
+    hostname: message_queue
+    expose:
+      - "5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: "message_queue_user"
+      RABBITMQ_DEFAULT_PASS: "EJWSYRYNNtqDkd4V"
+
   request:
     build: ./request/
+    depends_on:
+      - message_queue
+    environment:
+      DIPECK_MQ_HOST: "message_queue"
+      DIPECK_MQ_USER: "message_queue_user"
+      DIPECK_MQ_PASS: "EJWSYRYNNtqDkd4V"
     expose:
       - "5000"
-    networks:
-      - ntwrk
+
   frontend:
     build: ./frontend/
     depends_on:
       - request
     ports:
       - "80:80"
-    networks:
-      - ntwrk
