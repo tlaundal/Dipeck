@@ -6,11 +6,15 @@ def jsonify(f):
     @wraps(f)
     def wrapped(*args, **kwargs):
         res = f(*args, **kwargs)
-        code = 200
+        code = None
         if type(res) == tuple:
             code = res[1]
             res = res[0]
-        return f_jsonify(res), code
+        res = f_jsonify(res)
+        if code is not None:
+            return res, code
+        else:
+            return res
     return wrapped
 
 

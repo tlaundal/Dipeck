@@ -4,14 +4,16 @@ import pika
 
 class MessageQueue:
 
-    def __init__(self, host, port, user, pswd):
+    def __init__(self, host='localhost', port=5672, user='', pswd='',
+                 connection_factory=pika.BlockingConnection):
         self._credentials = pika.PlainCredentials(user, pswd)
         self._params = pika.ConnectionParameters(host, port, '/',
                                                  self._credentials)
+        self._connection_factory = connection_factory
 
     def _get_connection(self):
         if not hasattr(g, 'mq'):
-            g.mq = pika.BlockingConnection(self._params)
+            g.mq = self._connection_factory(self._params)
         return g.mq
 
     def _get_channel(self):

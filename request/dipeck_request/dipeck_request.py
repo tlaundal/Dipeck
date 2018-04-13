@@ -16,13 +16,19 @@ class Configuration(metaclass=MetaFlaskEnv):
     CACHE_PORT = 6379
 
 
-app = Flask(__name__)
-app.config.from_object(Configuration)
+def create_app(message_queue_factory=MessageQueue, cache_factory=Cache):
+    app = Flask(__name__)
+    app.config.from_object(Configuration)
 
-cache = Cache(app.config["CACHE_HOST"], app.config["CACHE_PORT"])
-message_queue = MessageQueue(app.config["MQ_HOST"], app.config["MQ_PORT"],
-                             app.config["MQ_USER"], app.config["MQ_PASS"])
-message_queue.register_teardown(app)
+    app.cache = cache_factory(app.config["CACHE_HOST"],
+                              app.config["CACHE_PORT"])
+    app.message_queue = message_queue_factory(app.config["MQ_HOST"],
+                                              app.config["MQ_PORT"],
+                                              app.config["MQ_USER"],
+                                              app.config["MQ_PASS"])
+    app.message_queue.register_teardown(app)
 
+    from .views import views
+    app.register_blueprint(views)
 
-from . import views # noqa
+    return app
