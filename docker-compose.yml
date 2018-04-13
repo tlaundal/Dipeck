@@ -34,3 +34,13 @@ services:
       - request
     ports:
       - "80:80"
+
+  worker:
+    build: ./worker/
+    depends_on:
+      - message_queue
+      - cache
+    environment:
+      DIPECK_MQ_HOST: "message_queue"
+      DIPECK_MQ_USER: "message_queue_user"
+      DIPECK_MQ_PASS: "EJWSYRYNNtqDkd4V"

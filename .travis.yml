@@ -23,3 +23,6 @@ jobs:
       script:
         - flake8
         - python -m unittest
+    - language: java
+      before_install:
+        - cd worker
