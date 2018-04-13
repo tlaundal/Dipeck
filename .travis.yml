@@ -4,6 +4,9 @@ jobs:
     - language: node_js
       node_js:
         - "9.11"
+      cache:
+        directories:
+          - "frontend/node_modules"
       before_install:
         - cd frontend
       script:
@@ -11,6 +14,7 @@ jobs:
     - language: python
       python:
         - "3.6"
+      cache: pip
       before_install:
         - cd request
       install:
@@ -19,6 +23,3 @@ jobs:
       script:
         - flake8
         - python -m unittest
-cache:
-  directories:
-    - "frontend/node_modules"
