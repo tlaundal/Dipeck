@@ -31,4 +31,8 @@ jobs:
       env:
         - COMPONENT=worker
       before_install:
-        - cd $WORKER
+        - cd $COMPONENT
+      install:
+        - ./gradlew assemble
+      script:
+        - ./gradlew check
