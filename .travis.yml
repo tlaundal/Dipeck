@@ -18,7 +18,7 @@ jobs:
         - pip install flake8
       script:
         - flake8
-        - pip install .
+        - python -m unittest
 cache:
   directories:
     - "frontend/node_modules"
