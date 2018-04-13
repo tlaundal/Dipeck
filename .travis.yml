@@ -4,19 +4,23 @@ jobs:
     - language: node_js
       node_js:
         - "9.11"
+      env:
+        - COMPONENT=frontend
       cache:
         directories:
           - "frontend/node_modules"
       before_install:
-        - cd frontend
+        - cd $COMPONENT
       script:
         - npm run lint
     - language: python
       python:
         - "3.6"
+      env:
+        - COMPONENT=request
       cache: pip
       before_install:
-        - cd request
+        - cd $COMPONENT
       install:
         - pip install -r requirements.txt
         - pip install flake8
@@ -24,5 +28,7 @@ jobs:
         - flake8
         - python -m unittest
     - language: java
+      env:
+        - COMPONENT=worker
       before_install:
-        - cd worker
+        - cd $WORKER
