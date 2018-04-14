@@ -1,5 +1,5 @@
 function isPrime(number) {
-  console.log("Pretending to check prime for", number);
+  number == 1;
 }
 
 class PrimeChecker {
@@ -19,10 +19,9 @@ class PrimeChecker {
   }
 }
 
-let instance;
 document.addEventListener('DOMContentLoaded', function init() {
   const form = document.getElementById('is-prime-form');
   const result = document.getElementById('is-prime-result');
 
-  instance = new PrimeChecker(form, result);
+  PrimeChecker(form, result);
 });
