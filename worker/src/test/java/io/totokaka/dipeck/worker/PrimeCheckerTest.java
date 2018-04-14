@@ -1,5 +1,6 @@
 package io.totokaka.dipeck.worker;
 
+import io.totokaka.dipeck.worker.handling.PrimeChecker;
 import org.junit.Ignore;
 import org.junit.Test;
 

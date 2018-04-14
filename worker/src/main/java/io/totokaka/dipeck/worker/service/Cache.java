@@ -1,4 +1,4 @@
-package io.totokaka.dipeck.worker;
+package io.totokaka.dipeck.worker.service;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;

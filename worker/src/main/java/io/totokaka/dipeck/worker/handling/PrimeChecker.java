@@ -1,4 +1,4 @@
-package io.totokaka.dipeck.worker;
+package io.totokaka.dipeck.worker.handling;
 
 public class PrimeChecker {
 

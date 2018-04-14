@@ -1,4 +1,7 @@
-package io.totokaka.dipeck.worker;
+package io.totokaka.dipeck.worker.handling;
+
+import io.totokaka.dipeck.worker.service.Cache;
+import io.totokaka.dipeck.worker.service.Publisher;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

@@ -1,6 +1,7 @@
-package io.totokaka.dipeck.worker;
+package io.totokaka.dipeck.worker.service;
 
 import com.rabbitmq.client.*;
+import io.totokaka.dipeck.worker.handling.MessageHandler;
 
 import java.io.IOException;
 import java.util.logging.Logger;
