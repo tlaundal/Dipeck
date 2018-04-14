@@ -45,3 +45,14 @@ services:
       DIPECK_MQ_USER: "message_queue_user"
       DIPECK_MQ_PASS: "EJWSYRYNNtqDkd4V"
       DIPECK_CACHE_HOST: "cache"
+
+  notification:
+    build: ./notification/
+    depends_on:
+      - cache
+    expose:
+      - "8080"
+    ports:
+      - "8080:8080"
+    environment:
+      DIPECK_CACHE_HOST: "cache"
