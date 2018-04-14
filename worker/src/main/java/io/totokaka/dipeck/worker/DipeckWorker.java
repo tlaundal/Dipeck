@@ -3,6 +3,10 @@ package io.totokaka.dipeck.worker;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -25,36 +29,71 @@ public class DipeckWorker {
     }
 
     private void run() {
-        ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost(getEnvVar("DIPECK_MQ_HOST", "localhost"));
-        factory.setPort(Integer.valueOf(getEnvVar("DIPECK_MQ_PORT", "5672")));
-        factory.setUsername(getEnvVar("DIPECK_MQ_USER", ""));
-        factory.setPassword(getEnvVar("DIPECK_MQ_PASS", ""));
-
-        Channel channel;
+        Channel messageQueue;
         try {
-            logger.log(Level.INFO, "Connecting to RabbitMQ {0}@{1}:{2}",
-                    new String[]{factory.getUsername(), factory.getHost(), String.valueOf(factory.getPort())});
-            Connection connection = factory.newConnection();
-            channel = connection.createChannel();
-            channel.queueDeclare(QUEUE_NAME, false, false, false, null);
-            logger.info("Connection to RabbitMQ established");
-        } catch (TimeoutException|IOException ex) {
-            logger.log(Level.SEVERE, "Error while connecting to the MessageQueue", ex);
+            messageQueue = connectRabbitMQ();
+        } catch (IOException|TimeoutException ex) {
+            logger.log(Level.SEVERE, "Error while connecting to RabbitMQ", ex);
+            System.exit(2);
+            return;
+        }
+
+        Cache cache;
+        Publisher publisher;
+        try {
+            JedisPool jedisPool = connectRedis();
+
+            cache = new Cache(jedisPool);
+            publisher = new Publisher(jedisPool);
+        } catch (JedisException ex) {
+            logger.log(Level.SEVERE, "Error while connecting to Redis", ex);
             System.exit(2);
             return;
         }
 
 
-        MessageHandler handler = new MessageHandler(logger);
-        MessageConsumer consumer = new MessageConsumer(channel, handler, logger);
+        MessageHandler handler = new MessageHandler(logger, cache, publisher);
+        MessageConsumer consumer = new MessageConsumer(messageQueue, handler, logger);
 
         try {
             logger.info("Waiting for tasks");
-            channel.basicConsume(QUEUE_NAME, consumer);
+            messageQueue.basicConsume(QUEUE_NAME, consumer);
         } catch (IOException ex) {
             logger.log(Level.SEVERE, "Error with consumer", ex);
         }
+    }
+
+    private JedisPool connectRedis() {
+        String host = getEnvVar("DIPECK_CACHE_HOST", "localhost");
+        int port = Integer.parseInt(getEnvVar("DIPECK_CACHE_PORT", "6379"));
+        JedisPool jedisPool = new JedisPool(
+                new JedisPoolConfig(),
+                host, port
+        );
+
+        logger.log(Level.INFO, "Connecting to Redis {0}:{1}",
+                new String[]{host, String.valueOf(port)});
+
+        try (Jedis jedis = jedisPool.getResource()) {
+            jedis.ping();
+        }
+        return jedisPool;
+    }
+
+    private Channel connectRabbitMQ() throws IOException, TimeoutException {
+        ConnectionFactory factory = new ConnectionFactory();
+        factory.setHost(getEnvVar("DIPECK_MQ_HOST", "localhost"));
+        factory.setPort(Integer.parseInt(getEnvVar("DIPECK_MQ_PORT", "5672")));
+        factory.setUsername(getEnvVar("DIPECK_MQ_USER", ""));
+        factory.setPassword(getEnvVar("DIPECK_MQ_PASS", ""));
+
+        logger.log(Level.INFO, "Connecting to RabbitMQ {0}@{1}:{2}",
+                new String[]{factory.getUsername(), factory.getHost(), String.valueOf(factory.getPort())});
+        Connection connection = factory.newConnection();
+        Channel channel = connection.createChannel();
+        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        logger.info("Connection to RabbitMQ established");
+        return channel;
     }
 
     public static void main(String[] args) {

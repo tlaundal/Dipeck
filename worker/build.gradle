@@ -7,6 +7,7 @@ mainClassName = 'io.totokaka.dipeck.worker.DipeckWorker'
 dependencies {
     compile 'com.google.guava:guava:23.0'
     compile 'com.rabbitmq:amqp-client:5.2.0'
+    compile 'redis.clients:jedis:2.9.0'
 
     testCompile 'junit:junit:4.12'
 }

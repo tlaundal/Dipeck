@@ -44,3 +44,4 @@ services:
       DIPECK_MQ_HOST: "message_queue"
       DIPECK_MQ_USER: "message_queue_user"
       DIPECK_MQ_PASS: "EJWSYRYNNtqDkd4V"
+      DIPECK_CACHE_HOST: "cache"
