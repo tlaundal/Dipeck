@@ -21,14 +21,35 @@ class PrimeChecker {
     const body = await res.json();
 
     if (body.type === 'result') {
-      this.result.innerHTML =
-        body.result ? `${number} is prime!` : `${number} is not prime.`;
+      this.setResult(number, body.result);
     } else if (body.type === 'enqueued'){
       this.result.innerHTML = 'Still calculating...';
-      // TODO listen for result
+      this.ensureListening();
+      this.lookingFor = number;
     } else {
       this.result.innerHTML = 'The servers is behaving badly...';
     }
+  }
+
+  setResult(number, result) {
+    this.result.innerHTML =
+      result ? `${number} is prime!` : `${number} is not prime.`;
+  }
+
+  ensureListening() {
+    if (!this.socket || this.socket.readyState > 1) {
+      this.socket = new WebSocket(`ws://${window.location.hostname}/notification`);
+      this.socket.addEventListener('message', this.onMessage.bind(this));
+    }
+  }
+
+  onMessage(message) {
+    const parts = message.data.split(':');
+    if (parts.length !== 2 || parseInt(parts[0]) !== this.lookingFor) {
+      return;
+    }
+
+    this.setResult(this.lookingFor, !!parseInt(parts[1]));
   }
 }
 

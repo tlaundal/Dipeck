@@ -22,7 +22,9 @@ class DipeckNotification {
 
   onConnection(ws) {
     this.logger.debug('Accepted new connection');
-    this.clients.add(new Client(this.logger, ws));
+    const client = new Client(this.logger, ws);
+    this.clients.add(client);
+    ws.on('close', () => this.clients.delete(client));
   }
 
   onMessage(channel, message) {
