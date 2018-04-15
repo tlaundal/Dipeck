@@ -24,8 +24,8 @@ class PrimeChecker {
       this.setResult(number, body.result);
     } else if (body.type === 'enqueued'){
       this.result.innerHTML = 'Still calculating...';
+      this.lookingFor = parseInt(number);
       this.ensureListening();
-      this.lookingFor = number;
     } else {
       this.result.innerHTML = 'The servers is behaving badly...';
     }
@@ -40,7 +40,14 @@ class PrimeChecker {
     if (!this.socket || this.socket.readyState > 1) {
       this.socket = new WebSocket(`ws://${window.location.hostname}/notification`);
       this.socket.addEventListener('message', this.onMessage.bind(this));
+      this.socket.addEventListener('open', this.onOpen.bind(this));
+    } else {
+      this.onOpen();
     }
+  }
+
+  onOpen() {
+    this.socket.send(this.lookingFor.toString());
   }
 
   onMessage(message) {
@@ -49,6 +56,7 @@ class PrimeChecker {
       return;
     }
 
+    this.socket.close();
     this.setResult(this.lookingFor, !!parseInt(parts[1]));
   }
 }
