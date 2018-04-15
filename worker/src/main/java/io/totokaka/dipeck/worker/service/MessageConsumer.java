@@ -4,6 +4,7 @@ import com.rabbitmq.client.*;
 import io.totokaka.dipeck.worker.handling.MessageHandler;
 
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class MessageConsumer extends DefaultConsumer {
@@ -22,8 +23,12 @@ public class MessageConsumer extends DefaultConsumer {
             throws IOException {
         String message = new String(body, "UTF-8");
         this.logger.info("Recieved message: " + message);
-        handler.handle(message);
-        super.getChannel().basicAck(envelope.getDeliveryTag(), false);
+        try {
+            handler.handle(message);
+            super.getChannel().basicAck(envelope.getDeliveryTag(), false);
+        } catch (Exception ex) {
+            this.logger.log(Level.WARNING, "Error while handling message", ex);
+        }
     }
 
 }

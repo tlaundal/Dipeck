@@ -9,6 +9,7 @@ dependencies {
     compile 'com.rabbitmq:amqp-client:5.2.0'
     compile 'redis.clients:jedis:2.9.0'
 
+    testCompile "org.mockito:mockito-core:2.+"
     testCompile 'junit:junit:4.12'
 }
 

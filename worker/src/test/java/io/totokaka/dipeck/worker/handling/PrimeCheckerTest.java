@@ -1,4 +1,4 @@
-package io.totokaka.dipeck.worker;
+package io.totokaka.dipeck.worker.handling;
 
 import io.totokaka.dipeck.worker.handling.PrimeChecker;
 import org.junit.Ignore;
@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 public class PrimeCheckerTest {
 
     @Test
-    public void isPrime() {
+    public void testSimplePrimes() {
         assertTrue("1 should be prime", PrimeChecker.isPrime(1));
         assertTrue("2 should be prime", PrimeChecker.isPrime(2));
         assertTrue("3 should be prime", PrimeChecker.isPrime(3));
@@ -20,7 +20,7 @@ public class PrimeCheckerTest {
 
     @Test
     @Ignore
-    public void testLong() {
+    public void testBigPrime() {
         // Takes about 2 minutes to compute
         assertTrue("Long number", PrimeChecker.isPrime(22801763489L));
     }

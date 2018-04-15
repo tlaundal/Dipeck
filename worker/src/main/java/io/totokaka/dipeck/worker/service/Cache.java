@@ -14,7 +14,6 @@ public class Cache {
     public void cache(long number, boolean isPrime) {
         try (Jedis jedis = pool.getResource()){
             jedis.set(String.valueOf(number), formatBoolean(isPrime));
-            jedis.publish("calculation-results", formatBoolean(isPrime));
         }
     }
 
