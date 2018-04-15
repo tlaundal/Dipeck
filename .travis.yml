@@ -13,6 +13,18 @@ jobs:
         - cd $COMPONENT
       script:
         - npm run lint
+    - language: node_js
+      node_js:
+        - "9.11"
+      env:
+        - COMPONENT=notification
+      cache:
+        directories:
+          - "notification/node_modules"
+      before_install:
+        - cd $COMPONENT
+      script:
+        - npm run lint
     - language: python
       python:
         - "3.6"

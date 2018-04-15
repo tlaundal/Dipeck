@@ -4,42 +4,43 @@ const redis = require('redis');
 const CHANNEL_NAME = 'calculation-results';
 
 class DipeckNotification {
-  constructor() {
+  constructor(logger) {
+    this.logger = logger;
     this.clients = new Set();
-
-    console.log('Listening ws on port 8080');
-    this.wss = new WebSocket.Server({ port: 8080 });
-    this.wss.on('connection', this.onConnection.bind(this));
 
     const port = parseInt(process.env.DIPECK_CACHE_PORT) || 6379;
     const host = process.env.DIPECK_CACHE_HOST || 'localhost';
-    console.log('Connecting to redis on', host, ':', port);
+    logger.info(`Connecting to redis on ${host}:${port}`);
     this.redisClient = redis.createClient(port, host);
     this.redisClient.on('message', this.onMessage.bind(this));
     this.redisClient.subscribe(CHANNEL_NAME);
 
-    console.log('Ready');
+    logger.info('Opening WebSocket server on port 8080');
+    this.wss = new WebSocket.Server({ port: 8080 });
+    this.wss.on('connection', this.onConnection.bind(this));
   }
 
   onConnection(ws) {
-    console.log('New client');
-    this.clients.add(new Client(ws));
+    this.logger.debug('Accepted new connection');
+    this.clients.add(new Client(this.logger, ws));
   }
 
   onMessage(channel, message) {
+    this.logger.info(`Recieved message on channel ${channel}: ${message}`);
     if (channel !== CHANNEL_NAME) {
-      console.log('Message on wrong channel:', channel);
-      return
-    };
+      this.logger.warn(`Received message on uknown channel: ${channel}`);
+      return;
+    }
 
     const parts = message.split(':');
     if (parts.length !== 2) {
-      console.log('Message of wrong format:', message);
+      this.logger.warn(`Received message in uknown format: ${message}`);
       return;
     }
     const number = parseInt(parts[0]);
     const isPrime = parts[1] === '1';
 
+    this.logger.info(`Announcing that ${number} is prime: ${isPrime}`);
     for (let client of this.clients) {
       client.broadcast(number, isPrime);
     }
@@ -47,7 +48,8 @@ class DipeckNotification {
 }
 
 class Client {
-  constructor(ws) {
+  constructor(logger, ws) {
+    this.logger = logger;
     this.ws = ws;
     this.ws.on('message', this.onMessage.bind(this));
   }
@@ -58,7 +60,6 @@ class Client {
 
   broadcast(number, isPrime) {
     isPrime = isPrime ? '1' : '0';
-    console.log("Broadcasting:", number, isPrime);
     this.ws.send(`${number}:${isPrime}`);
   }
 }
