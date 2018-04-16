@@ -19,6 +19,7 @@ public class MessageHandler {
     }
 
     public void handle(String numberText) throws NumberFormatException {
+        this.logger.info("Starting work on " + numberText);
         long number = Long.parseLong(numberText);
 
         boolean isPrime = PrimeChecker.isPrime(number);

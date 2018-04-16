@@ -22,7 +22,6 @@ public class MessageConsumer extends DefaultConsumer {
     public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body)
             throws IOException {
         String message = new String(body, "UTF-8");
-        this.logger.info("Recieved message: " + message);
         try {
             handler.handle(message);
             super.getChannel().basicAck(envelope.getDeliveryTag(), false);

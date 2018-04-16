@@ -13,6 +13,7 @@ import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,7 +37,7 @@ public class DipeckWorker {
         Channel messageQueue;
         try {
             messageQueue = connectRabbitMQ();
-        } catch (IOException|TimeoutException ex) {
+        } catch (IOException|TimeoutException|InterruptedException ex) {
             logger.log(Level.SEVERE, "Error while connecting to RabbitMQ", ex);
             System.exit(2);
             return;
@@ -81,10 +82,11 @@ public class DipeckWorker {
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.ping();
         }
+
         return jedisPool;
     }
 
-    private Channel connectRabbitMQ() throws IOException, TimeoutException {
+    private Channel connectRabbitMQ() throws IOException, TimeoutException, InterruptedException {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(getEnvVar("DIPECK_MQ_HOST", "localhost"));
         factory.setPort(Integer.parseInt(getEnvVar("DIPECK_MQ_PORT", "5672")));
@@ -93,7 +95,22 @@ public class DipeckWorker {
 
         logger.log(Level.INFO, "Connecting to RabbitMQ {0}@{1}:{2}",
                 new String[]{factory.getUsername(), factory.getHost(), String.valueOf(factory.getPort())});
-        Connection connection = factory.newConnection();
+        Connection connection = null;
+        for (int i = 0; i < 5; i++) {
+            try {
+                connection = factory.newConnection();
+                break;
+            } catch (ConnectException ex) {
+                if (i == 4) {
+                    throw ex;
+                } else {
+                    logger.warning("Failed to connect. Sleeping for " + i + " seconds before retrying");
+                    Thread.sleep(i * 1000L);
+                }
+            }
+        }
+        assert connection != null;
+
         Channel channel = connection.createChannel();
         channel.queueDeclare(QUEUE_NAME, false, false, false, null);
         logger.info("Connection to RabbitMQ established");
