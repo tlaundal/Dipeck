@@ -43,19 +43,47 @@ describe('Redis', function() {
     });
   });
   describe('#exists()', function() {
-    it('should pass through to redis', function() {
+    it('should work for existing keys', async function() {
+      client.exists.callsFake((key, cb) => {
+        assert.equal(key, 'somekey');
+        cb(null, true);
+      });
       createRedis();
-      redis.exists('somekey');
+      const actual = await redis.exists('somekey');
 
-      assert.ok(client.exists.withArgs('somekey'));
+      assert.equal(actual, true);
+    });
+    it('should work for non-existing keys', async function() {
+      client.exists.callsFake((key, cb) => {
+        assert.equal(key, 'somekey');
+        cb(null, false);
+      });
+      createRedis();
+      const actual = await redis.exists('somekey');
+
+      assert.equal(actual, false);
     });
   });
   describe('#get()', function() {
-    it('should pass through to redis', function() {
+    it('should work for primes', async function() {
+      client.get.callsFake((key, cb) => {
+        assert.equal(key, 'somekey');
+        cb(null, true);
+      });
       createRedis();
-      redis.get('somekey');
+      const actual = await redis.get('somekey');
 
-      assert.ok(client.get.withArgs('somekey'));
+      assert.equal(actual, true);
+    });
+    it('should work for non-primes', async function() {
+      client.get.callsFake((key, cb) => {
+        assert.equal(key, 'somekey');
+        cb(null, false);
+      });
+      createRedis();
+      const actual = await redis.get('somekey');
+
+      assert.equal(actual, false);
     });
   });
 });

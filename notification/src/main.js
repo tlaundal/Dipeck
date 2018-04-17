@@ -52,11 +52,11 @@ class Client {
     this.ws.on('message', this.onMessage.bind(this));
   }
 
-  onMessage(message) {
+  async onMessage(message) {
     this.lookingFor = parseInt(message);
 
-    if (this.cache.exists(message)) {
-      const isPrime = !!parseInt(this.cache.get(message));
+    if (await this.cache.exists(message)) {
+      const isPrime = !!parseInt(await this.cache.get(message));
       this.broadcast(this.lookingFor, isPrime);
     }
   }

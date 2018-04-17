@@ -1,3 +1,4 @@
+const {promisify} = require('util');
 const redis = require('redis');
 
 class Redis {
@@ -10,6 +11,8 @@ class Redis {
 
   connect(factory=redis.createClient) {
     this.client = factory(this.port, this.host);
+    this.client.get = promisify(this.client.get).bind(this.client);
+    this.client.exists = promisify(this.client.exists).bind(this.client);
   }
 
   subscribe(channel, listener, factory=redis.createClient) {
@@ -21,12 +24,12 @@ class Redis {
     this.subscribers.add(client);
   }
 
-  exists(key) {
-    return this.client.exists(key);
+  async exists(key) {
+    return await this.client.exists(key);
   }
 
-  get(key) {
-    return this.client.get(key);
+  async get(key) {
+    return await this.client.get(key);
   }
 
 }

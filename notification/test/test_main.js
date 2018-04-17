@@ -59,7 +59,13 @@ describe('main', function() {
 
         assert.ok(ws.send.notCalled);
       });
-      it('should pass on correct message', function() {
+      it('should pass on correctly for prime result', function() {
+        notification.onConnection(ws);
+        notification.onMessage('calculation-results', '149:1');
+
+        assert.ok(ws.send.withArgs('149:1').calledOnce);
+      });
+      it('should pass on correctly for non prime result', function() {
         notification.onConnection(ws);
         notification.onMessage('calculation-results', '100:0');
 
@@ -125,19 +131,27 @@ describe('main', function() {
     });
 
     describe('#onMessage()', function () {
-      it('should not broadcast if not in cache', function() {
+      it('should not broadcast if not in cache', async function() {
         constructClient();
-        client.onMessage('111');
+        await client.onMessage('111');
 
         assert.ok(ws.send.notCalled);
       });
-      it('should broadcast if in cache', function() {
-        cache.exists.withArgs('113').returns(true);
-        cache.get.withArgs('113').returns('1');
+      it('should broadcast correct value from cache for primes', async function() {
+        cache.exists.withArgs('113').returns(Promise.resolve(true));
+        cache.get.withArgs('113').returns(Promise.resolve('1'));
         constructClient();
-        client.onMessage('113');
+        await client.onMessage('113');
 
-        assert.ok(ws.send.called);
+        assert.ok(ws.send.withArgs('113:1').called);
+      });
+      it('should broadcast correct value from cache for non-primes', async function() {
+        cache.exists.withArgs('112').returns(Promise.resolve(true));
+        cache.get.withArgs('112').returns(Promise.resolve('0'));
+        constructClient();
+        await client.onMessage('112');
+
+        assert.ok(ws.send.withArgs('112:0').called);
       });
     });
   });
