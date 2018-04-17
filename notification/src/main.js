@@ -1,35 +1,29 @@
-const WebSocket = require('ws');
-const redis = require('redis');
-
 const CHANNEL_NAME = 'calculation-results';
 
 class DipeckNotification {
-  constructor(logger) {
+
+  /**
+   * In addition to instantiation, a WebSocket server should be started, with
+   * the 'connection' event bound to onConnection
+   */
+  constructor(logger, redis) {
     this.logger = logger;
+    this.redis = redis;
     this.clients = new Set();
 
-    const port = parseInt(process.env.DIPECK_CACHE_PORT) || 6379;
-    const host = process.env.DIPECK_CACHE_HOST || 'localhost';
-    logger.info(`Connecting to redis on ${host}:${port}`);
-    this.subscribeClient = redis.createClient(port, host);
-    this.subscribeClient.on('message', this.onMessage.bind(this));
-    this.subscribeClient.subscribe(CHANNEL_NAME);
-    this.cacheClient = redis.createClient(port, host);
-
-    logger.info('Opening WebSocket server on port 8080');
-    this.wss = new WebSocket.Server({ port: 8080 });
-    this.wss.on('connection', this.onConnection.bind(this));
+    this.onConnection = this.onConnection.bind(this);
   }
 
   onConnection(ws) {
-    this.logger.debug('Accepted new connection');
-    const client = new Client(this.logger, this.cacheClient, ws);
+    this.logger.info('New client connected');
+
+    const client = new Client(this.logger, this.redis, ws);
     this.clients.add(client);
+
     ws.on('close', () => this.clients.delete(client));
   }
 
   onMessage(channel, message) {
-    this.logger.info(`Recieved message on channel ${channel}: ${message}`);
     if (channel !== CHANNEL_NAME) {
       this.logger.warn(`Received message on uknown channel: ${channel}`);
       return;
@@ -43,7 +37,7 @@ class DipeckNotification {
     const number = parseInt(parts[0]);
     const isPrime = parts[1] === '1';
 
-    this.logger.info(`Announcing that ${number} is prime: ${isPrime}`);
+    this.logger.info(`Announcing to ${this.clients.size} clients: ${number} ${isPrime}`);
     for (let client of this.clients) {
       client.broadcast(number, isPrime);
     }
@@ -61,8 +55,8 @@ class Client {
   onMessage(message) {
     this.lookingFor = parseInt(message);
 
-    if (this.cache.exists(this.lookingFor)) {
-      const isPrime = !!parseInt(this.cache.get(this.lookingFor));
+    if (this.cache.exists(message)) {
+      const isPrime = !!parseInt(this.cache.get(message));
       this.broadcast(this.lookingFor, isPrime);
     }
   }
@@ -75,4 +69,5 @@ class Client {
   }
 }
 
+DipeckNotification.Client = Client;
 module.exports = DipeckNotification;

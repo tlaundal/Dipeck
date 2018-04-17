@@ -4,7 +4,13 @@
         "node": true
     },
     "extends": "eslint:recommended",
+    "plugins": [
+      "mocha"
+    ],
     "rules": {
+        "mocha/no-exclusive-tests": [
+          "error"
+        ],
         "indent": [
             "error",
             2
