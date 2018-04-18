@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "lint": "eslint ./src/",
+    "test": "mocha",
     "start": "node ./src/index.js"
   },
   "dependencies": {

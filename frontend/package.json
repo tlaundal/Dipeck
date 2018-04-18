@@ -2,7 +2,8 @@
   "name": "dipeck-frontend",
   "version": "0.0.1",
   "scripts": {
-    "lint": "eslint ./src/ && htmlhint ./src/"
+    "lint": "eslint ./src/ && htmlhint ./src/",
+    "test": "mocha"
   },
   "dependencies": {
     "eslint": "^4.19.1",

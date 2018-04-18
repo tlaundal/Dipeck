@@ -13,6 +13,7 @@ jobs:
         - cd $COMPONENT
       script:
         - npm run lint
+        - npm test
     - language: node_js
       node_js:
         - "9.11"
@@ -25,6 +26,7 @@ jobs:
         - cd $COMPONENT
       script:
         - npm run lint
+        - npm test
     - language: python
       python:
         - "3.6"
@@ -40,6 +42,7 @@ jobs:
         - flake8
         - python -m unittest
     - language: java
+      jdk: openjdk8
       env:
         - COMPONENT=worker
       before_install:
