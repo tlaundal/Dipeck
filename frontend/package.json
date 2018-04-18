@@ -7,5 +7,12 @@
   "dependencies": {
     "eslint": "^4.19.1",
     "htmlhint": "0.9.13"
+  },
+  "devDependencies": {
+    "eslint-plugin-mocha": "^5.0.0",
+    "jsdom": "^11.8.0",
+    "mocha": "^5.1.0",
+    "sinon": "^4.5.0",
+    "unroll": "^1.5.0"
   }
 }
