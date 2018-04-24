@@ -5,7 +5,8 @@ import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-import static org.junit.Assert.*;
+import java.util.logging.Logger;
+
 import static org.mockito.Mockito.*;
 
 public class PublisherTest {
@@ -19,7 +20,7 @@ public class PublisherTest {
         JedisPool pool = mock(JedisPool.class);
         when(pool.getResource()).thenReturn(jedis);
 
-        this.publisher = new Publisher(pool);
+        this.publisher = new Publisher(pool, mock(Logger.class));
     }
 
     @Test

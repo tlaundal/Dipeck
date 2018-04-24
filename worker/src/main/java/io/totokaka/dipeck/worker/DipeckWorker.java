@@ -49,7 +49,7 @@ public class DipeckWorker {
             JedisPool jedisPool = connectRedis();
 
             cache = new Cache(jedisPool);
-            publisher = new Publisher(jedisPool);
+            publisher = new Publisher(jedisPool, logger);
         } catch (JedisException ex) {
             logger.log(Level.SEVERE, "Error while connecting to Redis", ex);
             System.exit(2);

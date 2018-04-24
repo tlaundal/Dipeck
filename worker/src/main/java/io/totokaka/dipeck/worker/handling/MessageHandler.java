@@ -24,8 +24,6 @@ public class MessageHandler {
 
         boolean isPrime = PrimeChecker.isPrime(number);
 
-        this.logger.log(Level.INFO, "Got result for {0}: {1}", new String[]{numberText, String.valueOf(isPrime)});
-
         cache.cache(number, isPrime);
         publisher.publish(number, isPrime);
     }

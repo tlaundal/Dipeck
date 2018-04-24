@@ -1,3 +1,4 @@
+const uuid = require('uuid');
 const CHANNEL_NAME = 'calculation-results';
 
 class DipeckNotification {
@@ -16,7 +17,8 @@ class DipeckNotification {
   }
 
   onConnection(ws) {
-    this.logger.info('New client connected');
+    ws.id = uuid.v4().substr(9,4);
+    this.logger.info(`[${ws.id}] New client connected`);
 
     const client = new Client(this.logger, this.redis, ws);
     this.clients.add(client);
@@ -38,7 +40,7 @@ class DipeckNotification {
     const number = parseInt(parts[0]);
     const isPrime = parts[1] === '1';
 
-    this.logger.info(`Announcing to ${this.clients.size} clients: ${number} ${isPrime}`);
+    this.logger.info(`Recieved result: ${number} is prime: ${isPrime}`);
     for (let client of this.clients) {
       client.broadcast(number, isPrime);
     }
@@ -50,20 +52,25 @@ class Client {
     this.logger = logger;
     this.cache = cache;
     this.ws = ws;
+    this.id = ws.id;
+
     this.ws.on('message', this.onMessage.bind(this));
   }
 
   async onMessage(message) {
+    this.logger.info(`[${this.id}] Looking for: ${message}`);
     this.lookingFor = parseInt(message);
 
     if (await this.cache.exists(message)) {
       const isPrime = !!parseInt(await this.cache.get(message));
+      this.logger.info(`[${this.id}] Using cached result`);
       this.broadcast(this.lookingFor, isPrime);
     }
   }
 
   broadcast(number, isPrime) {
     if (!this.lookingFor || this.lookingFor === number) {
+      this.logger.info(`[${this.id}] Broadcasting result: ${isPrime}`);
       isPrime = isPrime ? '1' : '0';
       this.ws.send(`${number}:${isPrime}`);
     }
