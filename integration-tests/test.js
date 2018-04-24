@@ -26,7 +26,7 @@ function getComposeArgs() {
 }
 
 before(async function startDocker() {
-  this.timeout(60000);
+  this.timeout(5 * 60 * 1000);
   log('Starting docker.. May take a while');
   await compose.dockerComposeUp(composeFile, getComposeArgs());
 
