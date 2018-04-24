@@ -1,16 +1,19 @@
-version: "3.2"
+version: "3.4"
+
+x-environment:
+  &default-env
+  DIPECK_MQ_HOST: "message_queue"
+  DIPECK_MQ_USER: "message_queue_user"
+  DIPECK_MQ_PASS: "EJWSYRYNNtqDkd4V"
+  DIPECK_CACHE_HOST: "cache"
 
 services:
   cache:
     image: redis:3.2.11
-    expose:
-      - "6379"
 
   message_queue:
     image: rabbitmq:3.7.4
     hostname: message_queue
-    expose:
-      - "5672"
     environment:
       RABBITMQ_DEFAULT_USER: "message_queue_user"
       RABBITMQ_DEFAULT_PASS: "EJWSYRYNNtqDkd4V"
@@ -20,13 +23,7 @@ services:
     depends_on:
       - message_queue
       - cache
-    environment:
-      DIPECK_MQ_HOST: "message_queue"
-      DIPECK_MQ_USER: "message_queue_user"
-      DIPECK_MQ_PASS: "EJWSYRYNNtqDkd4V"
-      DIPECK_CACHE_HOST: "cache"
-    expose:
-      - "5000"
+    environment: *default-env
 
   frontend:
     build: ./frontend/
@@ -41,17 +38,10 @@ services:
     depends_on:
       - message_queue
       - cache
-    environment:
-      DIPECK_MQ_HOST: "message_queue"
-      DIPECK_MQ_USER: "message_queue_user"
-      DIPECK_MQ_PASS: "EJWSYRYNNtqDkd4V"
-      DIPECK_CACHE_HOST: "cache"
+    environment: *default-env
 
   notification:
     build: ./notification/
     depends_on:
       - cache
-    expose:
-      - "8080"
-    environment:
-      DIPECK_CACHE_HOST: "cache"
+    environment: *default-env
