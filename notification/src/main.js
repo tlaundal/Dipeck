@@ -11,6 +11,7 @@ class DipeckNotification {
     this.redis = redis;
     this.clients = new Set();
 
+    this.redis.subscribe(CHANNEL_NAME, this.onMessage.bind(this));
     this.onConnection = this.onConnection.bind(this);
   }
 
