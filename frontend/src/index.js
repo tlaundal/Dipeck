@@ -23,6 +23,13 @@ async function queryIsPrime(number) {
 }
 
 class PrimeResultListener extends EventTarget {
+
+  constructor() {
+    super();
+    // Workaround for JSDOM
+    this._document = window.document;
+  }
+
   listen(number, path=`ws://${window.location.hostname}/notification`) {
     this.target = number;
 
@@ -76,6 +83,7 @@ class Dipeck {
 
   done(result) {
     this.status(`${result.number} is ${result.isPrime ? 'prime' : 'not prime'}`);
+    document.dispatchEvent(new Event('dipeck-result'));
   }
 
   async onSubmit(event) {
@@ -83,13 +91,18 @@ class Dipeck {
     const number = parseInt(this.input.value);
 
     this.status('Calculating...');
-    const response = await queryIsPrime(number);
+    const response = await queryIsPrime(number).catch(err => ({
+      type: 'error',
+      err
+    }));
 
     if (response.type === 'result') {
       this.done(response.result);
     } else if (response.type === 'enqueued') {
       this.status('Still calculating...');
       this.primeResultListener.listen(number);
+    } else if (response.type === 'error') {
+      this.status('An error occured');
     }
   }
 }
@@ -103,7 +116,7 @@ document.addEventListener('DOMContentLoaded', function init() {
   const form = document.getElementById('is_prime_form');
   const result = document.getElementById('is_prime_result');
 
-  const dipeck = new Dipeck(form[0], result);
+  const dipeck = new Dipeck(form.elements[0], result);
   form.addEventListener('submit', dipeck.onSubmit);
   document.dispatchEvent(new Event('dipeck-loaded'));
 });

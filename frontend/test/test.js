@@ -8,17 +8,16 @@ unroll.use(it);
 describe('frontend', function() {
   let window;
 
-  before(function(callback) {
-    JSDOM.fromFile(`${__dirname}/../src/index.html`, {
+  before(async function() {
+    const dom = await JSDOM.fromFile(`${__dirname}/../src/index.html`, {
       runScripts: 'dangerously',
       resources: 'usable'
-    }).then(dom => {
-      window = dom.window;
+    });
+    window = dom.window;
 
-      return new Promise(resolve => {
-        window.document.addEventListener('dipeck-loaded', resolve);
-      });
-    }).then(() => callback());
+    return new Promise(resolve => {
+      window.document.addEventListener('dipeck-loaded', resolve);
+    });
   });
 
   describe('#queryIsPrime()', function() {
