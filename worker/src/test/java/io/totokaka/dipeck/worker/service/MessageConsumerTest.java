@@ -35,12 +35,18 @@ public class MessageConsumerTest {
         verify(channel).basicAck(envelope.getDeliveryTag(), false);
     }
 
+    /**
+     * Ensures the consumer acknowledges also on exceptions.
+     * This is because all other workes will likely fail with the same exception
+     * and because the non-acknowledged message will not be re-sent before this
+     * worker disconnects.
+     */
     @Test
-    public void testNoAcknowledgeOnException() throws IOException {
+    public void testAcknowledgesOnException() throws IOException {
         doThrow(new RuntimeException("Calculation failed!")).when(handler).handle("113");
         consumer.handleDelivery("tag", envelope, mock(AMQP.BasicProperties.class), "113".getBytes());
 
-        verify(channel, never()).basicAck(envelope.getDeliveryTag(), false);
+        verify(channel).basicAck(envelope.getDeliveryTag(), false);
     }
 
     @Test

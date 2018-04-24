@@ -62,7 +62,7 @@ public class DipeckWorker {
 
         try {
             logger.info("Waiting for tasks");
-            messageQueue.basicConsume(QUEUE_NAME, consumer);
+            messageQueue.basicConsume(QUEUE_NAME, false, consumer);
         } catch (IOException ex) {
             logger.log(Level.SEVERE, "Error with consumer", ex);
         }
@@ -113,6 +113,7 @@ public class DipeckWorker {
 
         Channel channel = connection.createChannel();
         channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        channel.basicQos(1);
         logger.info("Connection to RabbitMQ established");
         return channel;
     }

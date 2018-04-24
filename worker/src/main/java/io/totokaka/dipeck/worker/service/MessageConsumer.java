@@ -24,9 +24,10 @@ public class MessageConsumer extends DefaultConsumer {
         String message = new String(body, "UTF-8");
         try {
             handler.handle(message);
-            super.getChannel().basicAck(envelope.getDeliveryTag(), false);
         } catch (Exception ex) {
             this.logger.log(Level.WARNING, "Error while handling message", ex);
+        } finally {
+            super.getChannel().basicAck(envelope.getDeliveryTag(), false);
         }
     }
 
