@@ -63,4 +63,5 @@ jobs:
         directories:
           - "$COMPONENT/node_modules"
       before_install:
+        - docker-compose --version
         - cd $COMPONENT

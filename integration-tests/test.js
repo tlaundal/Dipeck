@@ -16,10 +16,19 @@ function log(msg) {
   console.log(msg); // eslint-disable-line no-console
 }
 
+function getComposeArgs() {
+  if (process.env['CI']) {
+    log('Running as CI (without --renew-anon-volumes)');
+    return [];
+  } else {
+    return ['--renew-anon-volumes'];
+  }
+}
+
 before(async function startDocker() {
   this.timeout(60000);
   log('Starting docker.. May take a while');
-  await compose.dockerComposeUp(composeFile, ['--renew-anon-volumes']);
+  await compose.dockerComposeUp(composeFile, getComposeArgs());
 
   const port = await compose.dockerInspectPortOfContainer('dipeck_frontend_1');
   const host = (process.env.DOCKER_HOST || 'localhost').split(':')[0];
