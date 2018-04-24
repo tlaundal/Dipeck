@@ -104,8 +104,8 @@ public class DipeckWorker {
                 if (i == 4) {
                     throw ex;
                 } else {
-                    logger.warning("Failed to connect. Sleeping for " + i + " seconds before retrying");
-                    Thread.sleep(i * 1000L);
+                    logger.warning("Failed to connect. Sleeping for " + (i+1) + " seconds before retrying");
+                    Thread.sleep((i+1) * 1000L);
                 }
             }
         }
