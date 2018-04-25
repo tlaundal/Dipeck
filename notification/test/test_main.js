@@ -6,6 +6,8 @@ const winston = require('winston');
 const DipeckNotification = require('../src/main.js');
 const Redis = require('../src/redis.js');
 
+const CHANNEL_NAME = 'calculation-results';
+
 describe('main', function() {
   let cache;
   let logger;
@@ -30,6 +32,12 @@ describe('main', function() {
       notification = new DipeckNotification(logger, cache);
     });
 
+    describe('#constructor()', function() {
+      it('should subscribe to redis channel', function() {
+        assert.ok(cache.subscribe.withArgs(CHANNEL_NAME).calledOnce);
+      });
+    });
+
     describe('#onConnection()', function() {
       it('should register a close handler', function() {
         notification.onConnection(ws);
@@ -42,7 +50,7 @@ describe('main', function() {
         notification.onConnection(ws);
         notification.onConnection(ws2);
 
-        notification.onMessage('calculation-results', '100:0');
+        notification.onMessage(CHANNEL_NAME, '100:0');
 
         assert.ok(ws.send.called);
         assert.ok(ws2.send.called);
@@ -55,19 +63,19 @@ describe('main', function() {
       });
       it('should not broadcast when wrong format', function () {
         notification.onConnection(ws);
-        notification.onMessage('calculation-results', '100');
+        notification.onMessage(CHANNEL_NAME, '100');
 
         assert.ok(ws.send.notCalled);
       });
       it('should pass on correctly for prime result', function() {
         notification.onConnection(ws);
-        notification.onMessage('calculation-results', '149:1');
+        notification.onMessage(CHANNEL_NAME, '149:1');
 
         assert.ok(ws.send.withArgs('149:1').calledOnce);
       });
       it('should pass on correctly for non prime result', function() {
         notification.onConnection(ws);
-        notification.onMessage('calculation-results', '100:0');
+        notification.onMessage(CHANNEL_NAME, '100:0');
 
         assert.ok(ws.send.withArgs('100:0').calledOnce);
       });
