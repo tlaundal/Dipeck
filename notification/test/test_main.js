@@ -11,13 +11,7 @@ const CHANNEL_NAME = 'calculation-results';
 describe('main', function() {
   let cache;
   let logger;
-  let ws$;
   let ws;
-
-  function useMock() {
-    ws = Object.create(WebSocket.prototype);
-    ws$ = sinon.mock(ws);
-  }
 
   beforeEach(function() {
     cache = sinon.createStubInstance(Redis);
