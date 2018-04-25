@@ -51,7 +51,7 @@ describe('frontend', function() {
       assert.deepEqual(actual, data.expected);
     }, [
       ['type', 'response', 'expected'],
-      ['result', fakeResponse({type:'result',result:false}), {type:'result',result:{number:134,isPrime:false}}],
+      ['result', fakeResponse({type:'result',number:134,isPrime:false}), {type:'result',number:134,isPrime:false}],
       ['enqueued', fakeResponse({type:'enqueued'}), {type:'enqueued'}]
     ]);
 
@@ -129,7 +129,7 @@ describe('frontend', function() {
 
         const {detail} = await eventPromise;
 
-        assert.deepEqual({number: 113, isPrime: true}, detail);
+        assert.deepEqual({type: 'result', number: 113, isPrime: true}, detail);
       });
     });
   });

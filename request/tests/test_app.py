@@ -47,22 +47,33 @@ class TestApp(unittest.TestCase):
 
         self.assertEqual(res.status_code, 400)
         self.assertEqual(body['type'], 'error')
+        self.assertIn('code', body)
+        self.assertIn('message', body)
 
         res = self.client.get('is-prime?num=a')
         body = json.loads(res.data.decode())
 
         self.assertEqual(res.status_code, 400)
         self.assertEqual(body['type'], 'error')
+        self.assertIn('code', body)
+        self.assertIn('message', body)
 
     def test_enqueue_results(self):
         res = self.client.get('is-prime?num=13')
         body = json.loads(res.data.decode())
 
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(body['type'], 'result')
+        self.assertEqual(body, {
+            'type': 'result',
+            'number': 13,
+            'isPrime': True
+        });
 
         res = self.client.get('is-prime?num=11')
         body = json.loads(res.data.decode())
 
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(body['type'], 'enqueued')
+        self.assertEqual(body, {
+            'type': 'enqueued',
+            'number': 11
+        });

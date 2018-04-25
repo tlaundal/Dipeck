@@ -22,7 +22,7 @@ def is_prime():
 
     if current_app.cache.contains(arg):
         is_prime = current_app.cache.get(arg)
-        return {'type': 'result', 'result': is_prime}
+        return {'type': 'result', 'isPrime': is_prime, 'number': arg}
     else:
         current_app.message_queue.enqueue(arg)
-        return {'type': 'enqueued'}
+        return {'type': 'enqueued', 'number': arg}

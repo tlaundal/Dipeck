@@ -1,25 +1,20 @@
+/**
+ * Sends a query to the backend to check whether the number is prime.
+ *
+ * @param  {number} number - The number to check
+ * @returns {object} The resulting object from the backend
+ * @throws {Error} If the fetch call doesn't resolve or the response isn't ok
+ */
 async function queryIsPrime(number) {
-  const res = await fetch(`/request/is-prime?num=${number}`);
+  const res = await fetch(`/request/is-prime?num=${number}`).catch(err => ({
+    ok: false,
+    error: err
+  }));
   if (!res.ok) {
     throw Error('Response not OK');
   }
 
-  const result = await res.json();
-  if (result.type === 'result') {
-    return {
-      type: 'result',
-      result: {
-        number,
-        isPrime: result.result
-      }
-    };
-  } else if (result.type === 'enqueued') {
-    return {
-      type: 'enqueued'
-    };
-  } else {
-    throw Error('Uknown response');
-  }
+  return await res.json();
 }
 
 class PrimeResultListener extends EventTarget {
@@ -57,6 +52,7 @@ class PrimeResultListener extends EventTarget {
     this.socket.close();
     this.dispatchEvent(new CustomEvent('result', {
       detail: {
+        type: 'result',
         number: this.target,
         isPrime
       }
@@ -93,11 +89,11 @@ class Dipeck {
     this.status('Calculating...');
     const response = await queryIsPrime(number).catch(err => ({
       type: 'error',
-      err
+      error: err
     }));
 
     if (response.type === 'result') {
-      this.done(response.result);
+      this.done(response);
     } else if (response.type === 'enqueued') {
       this.status('Still calculating...');
       this.primeResultListener.listen(number);
