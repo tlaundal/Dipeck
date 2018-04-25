@@ -1,5 +1,6 @@
 package io.totokaka.dipeck.worker;
 
+import com.google.gson.Gson;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -58,7 +59,7 @@ public class DipeckWorker {
 
 
         MessageHandler handler = new MessageHandler(logger, cache, publisher);
-        MessageConsumer consumer = new MessageConsumer(messageQueue, handler, logger);
+        MessageConsumer consumer = new MessageConsumer(messageQueue, handler, logger, new Gson());
 
         try {
             logger.info("Waiting for tasks");

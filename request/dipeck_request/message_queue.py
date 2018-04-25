@@ -1,5 +1,6 @@
 from flask import g
 import pika
+import json
 
 
 class MessageQueue:
@@ -26,8 +27,12 @@ class MessageQueue:
 
     def enqueue(self, num):
         """ Enqueue a number to be checked. """
+        body = json.dumps({
+          'type': 'task',
+          'number': num
+        })
         self._get_channel().basic_publish(exchange='', routing_key='is-prime',
-                                          body=str(num))
+                                          body=body)
 
     def register_teardown(self, app):
         def teardown(error):

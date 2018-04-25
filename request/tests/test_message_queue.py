@@ -1,5 +1,6 @@
 import unittest
 import flask
+import json
 from dipeck_request.message_queue import MessageQueue
 
 
@@ -48,4 +49,7 @@ class TestMessageQueue(unittest.TestCase):
         with self.app.test_request_context('/is-prime?num=13'):
             self.mq.enqueue(13)
             self.assertEqual('is-prime', self.mock.publish['routing_key'])
-            self.assertEqual('13', self.mock.publish['body'])
+            self.assertEqual({
+                'type': 'task',
+                'number': 13
+            }, json.loads(self.mock.publish['body']))

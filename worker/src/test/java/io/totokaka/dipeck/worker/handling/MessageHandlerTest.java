@@ -25,7 +25,7 @@ public class MessageHandlerTest {
 
     @Test
     public void testHandlePrime() {
-        messageHandler.handle("113");
+        messageHandler.handle(113L);
 
         verify(this.cache).cache(113L, true);
         verify(this.publisher).publish(113L, true);
@@ -33,7 +33,7 @@ public class MessageHandlerTest {
 
     @Test
     public void testHandleNonPrime() {
-        messageHandler.handle("114");
+        messageHandler.handle(114L);
 
         verify(this.cache).cache(114L, false);
         verify(this.publisher).publish(114L, false);
