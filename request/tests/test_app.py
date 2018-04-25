@@ -67,7 +67,7 @@ class TestApp(unittest.TestCase):
             'type': 'result',
             'number': 13,
             'isPrime': True
-        });
+        })
 
         res = self.client.get('is-prime?num=11')
         body = json.loads(res.data.decode())
@@ -76,4 +76,4 @@ class TestApp(unittest.TestCase):
         self.assertEqual(body, {
             'type': 'enqueued',
             'number': 11
-        });
+        })
