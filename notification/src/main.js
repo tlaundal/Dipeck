@@ -32,17 +32,15 @@ class DipeckNotification {
       return;
     }
 
-    const parts = message.split(':');
-    if (parts.length !== 2) {
-      this.logger.warn(`Received message in uknown format: ${message}`);
+    const packet = JSON.parse(message);
+    if (packet.type !== 'result') {
+      this.logger.warn(`Received packet of uknown kind: ${message}`);
       return;
     }
-    const number = parseInt(parts[0]);
-    const isPrime = parts[1] === '1';
 
-    this.logger.info(`Recieved result: ${number} is prime: ${isPrime}`);
+    this.logger.info(`Recieved result: ${packet.number} is prime: ${packet.isPrime}`);
     for (let client of this.clients) {
-      client.broadcast(number, isPrime);
+      client.broadcast(packet);
     }
   }
 }
@@ -60,19 +58,21 @@ class Client {
   async onMessage(message) {
     this.logger.info(`[${this.id}] Looking for: ${message}`);
     this.lookingFor = parseInt(message);
-
     if (await this.cache.exists(message)) {
       const isPrime = !!parseInt(await this.cache.get(message));
       this.logger.info(`[${this.id}] Using cached result`);
-      this.broadcast(this.lookingFor, isPrime);
+      this.broadcast({
+        type: 'result',
+        number: this.lookingFor,
+        isPrime
+      });
     }
   }
 
-  broadcast(number, isPrime) {
-    if (!this.lookingFor || this.lookingFor === number) {
-      this.logger.info(`[${this.id}] Broadcasting result: ${isPrime}`);
-      isPrime = isPrime ? '1' : '0';
-      this.ws.send(`${number}:${isPrime}`);
+  broadcast(packet) {
+    if (!this.lookingFor || this.lookingFor === packet.number) {
+      this.logger.info(`[${this.id}] Broadcasting result: ${packet.isPrime}`);
+      this.ws.send(JSON.stringify(packet));
     }
   }
 }

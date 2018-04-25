@@ -44,18 +44,13 @@ class PrimeResultListener extends EventTarget {
   }
 
   onMessage(message) {
-    const parts = message.data.split(':');
-    if (parts.length !== 2 || parseInt(parts[0]) !== this.target) {
+    const packet = JSON.parse(message.data);
+    if (packet.type !== 'result' || packet.number !== this.target) {
       return;
     }
-    const isPrime = !!parseInt(parts[1]);
     this.socket.close();
     this.dispatchEvent(new CustomEvent('result', {
-      detail: {
-        type: 'result',
-        number: this.target,
-        isPrime
-      }
+      detail: packet
     }));
   }
 

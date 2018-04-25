@@ -50,14 +50,16 @@ describe('main', function() {
         notification.onConnection(ws);
         notification.onConnection(ws2);
 
-        notification.onMessage(CHANNEL_NAME, '100:0');
+        notification.onMessage(CHANNEL_NAME,
+          '{"type": "result","number":100,"isPrime":false}');
 
         assert.ok(ws.send.called);
         assert.ok(ws2.send.called);
       });
       it('should not broadcast when recieving other channel', function () {
         notification.onConnection(ws);
-        notification.onMessage('asdf');
+        notification.onMessage('asdf',
+          '{"type": "result","number":100,"isPrime":false}');
 
         assert.ok(ws.send.notCalled);
       });
@@ -68,16 +70,20 @@ describe('main', function() {
         assert.ok(ws.send.notCalled);
       });
       it('should pass on correctly for prime result', function() {
+        const packet = {type: 'result', number: 149, isPrime: true};
         notification.onConnection(ws);
-        notification.onMessage(CHANNEL_NAME, '149:1');
+        notification.onMessage(CHANNEL_NAME, JSON.stringify(packet));
 
-        assert.ok(ws.send.withArgs('149:1').calledOnce);
+        const out = ws.send.firstCall.args[0];
+        assert.deepEqual(JSON.parse(out), packet);
       });
       it('should pass on correctly for non prime result', function() {
+        const packet = {type: 'result', number: 100, isPrime: false};
         notification.onConnection(ws);
-        notification.onMessage(CHANNEL_NAME, '100:0');
+        notification.onMessage(CHANNEL_NAME, JSON.stringify(packet));
 
-        assert.ok(ws.send.withArgs('100:0').calledOnce);
+        const out = ws.send.firstCall.args[0];
+        assert.deepEqual(JSON.parse(out), packet);
       });
     });
   });
@@ -98,41 +104,23 @@ describe('main', function() {
     });
 
     describe('#broadcast()', function () {
-      it('should format nonPrime messages correctly', function() {
-        useMock();
-        ws$.expects('send').withArgs('100:0').once();
-
-        constructClient();
-        client.broadcast(100, false);
-
-        ws$.verify();
-      });
-      it('should format prime messages correctly', function() {
-        useMock();
-        ws$.expects('send').withArgs('113:1').once();
-
-        constructClient();
-        client.broadcast(113, true);
-
-        ws$.verify();
-      });
       it('should allways broadcast when there is no target', function() {
         constructClient();
-        client.broadcast();
+        client.broadcast({type: 'result', number: 1, isPrime: true});
 
         assert.ok(ws.send.called);
       });
       it('should broadcast when the target is correct', function() {
         constructClient();
         client.onMessage('100');
-        client.broadcast(100);
+        client.broadcast({type: 'result', number: 100, isPrime: false});
 
         assert.ok(ws.send.called);
       });
       it('should not broadcast when the target is incorrect', function() {
         constructClient();
         client.onMessage('113');
-        client.broadcast(100);
+        client.broadcast({type: 'result', number: 100, isPrime: false});
 
         assert.ok(ws.send.notCalled);
       });
@@ -151,7 +139,9 @@ describe('main', function() {
         constructClient();
         await client.onMessage('113');
 
-        assert.ok(ws.send.withArgs('113:1').called);
+        assert.ok(ws.send.calledOnce);
+        const out = ws.send.firstCall.args[0];
+        assert.deepEqual(JSON.parse(out), {type: 'result', number: 113, isPrime: true});
       });
       it('should broadcast correct value from cache for non-primes', async function() {
         cache.exists.withArgs('112').returns(Promise.resolve(true));
@@ -159,7 +149,9 @@ describe('main', function() {
         constructClient();
         await client.onMessage('112');
 
-        assert.ok(ws.send.withArgs('112:0').called);
+        assert.ok(ws.send.calledOnce);
+        const out = ws.send.firstCall.args[0];
+        assert.deepEqual(JSON.parse(out), {type: 'result', number: 112, isPrime: false});
       });
     });
   });

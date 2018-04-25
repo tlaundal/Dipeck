@@ -109,13 +109,21 @@ describe('frontend', function() {
     describe('#onMessage()', function() {
       it('should close the websocket on relevant message', function() {
         primeResultListener.target = 123;
-        primeResultListener.onMessage({data:'123:0'});
+        primeResultListener.onMessage({data:JSON.stringify({
+          type: 'result',
+          number: 123,
+          isPrime: false
+        })});
 
         assert.ok(primeResultListener.socket.close.calledOnce);
       });
       it('should not close the websocket on non-relevant message', function () {
         primeResultListener.target = 123;
-        primeResultListener.onMessage({data:'113:1'});
+        primeResultListener.onMessage({data:JSON.stringify({
+          type: 'result',
+          number: 113,
+          isPrime: true
+        })});
 
         assert.ok(primeResultListener.socket.close.notCalled);
       });
@@ -123,13 +131,18 @@ describe('frontend', function() {
         const eventPromise = new Promise(resolve => {
           primeResultListener.addEventListener('result', resolve);
         });
+        const packet = {
+          type: 'result',
+          number: 113,
+          isPrime: true
+        };
 
         primeResultListener.target = 113;
-        primeResultListener.onMessage({data:'113:1'});
+        primeResultListener.onMessage({data:JSON.stringify(packet)});
 
         const {detail} = await eventPromise;
 
-        assert.deepEqual({type: 'result', number: 113, isPrime: true}, detail);
+        assert.deepEqual(packet, detail);
       });
     });
   });
