@@ -39,7 +39,10 @@ class PrimeResultListener extends EventTarget {
 
   doHandshake() {
     if (this.target || this.target === 0) {
-      this.socket.send(this.target.toString());
+      this.socket.send(JSON.stringify({
+        type: 'target',
+        number: this.target
+      }));
     }
   }
 

@@ -25,11 +25,11 @@ class Redis {
   }
 
   async exists(key) {
-    return await this.client.exists(key);
+    return await this.client.exists(key.toString());
   }
 
   async get(key) {
-    return await this.client.get(key);
+    return await this.client.get(key.toString());
   }
 
 }

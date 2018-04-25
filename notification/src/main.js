@@ -57,9 +57,15 @@ class Client {
 
   async onMessage(message) {
     this.logger.info(`[${this.id}] Looking for: ${message}`);
-    this.lookingFor = parseInt(message);
-    if (await this.cache.exists(message)) {
-      const isPrime = !!parseInt(await this.cache.get(message));
+
+    const packet = JSON.parse(message);
+    if (packet.type !== 'target') {
+      return;
+    }
+
+    this.lookingFor = packet.number;
+    if (await this.cache.exists(this.lookingFor)) {
+      const isPrime = !!parseInt(await this.cache.get(this.lookingFor));
       this.logger.info(`[${this.id}] Using cached result`);
       this.broadcast({
         type: 'result',

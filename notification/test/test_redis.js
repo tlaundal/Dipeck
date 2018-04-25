@@ -65,25 +65,25 @@ describe('Redis', function() {
     });
   });
   describe('#get()', function() {
-    it('should work for primes', async function() {
+    it('should work for true values', async function() {
       client.get.callsFake((key, cb) => {
         assert.equal(key, 'somekey');
-        cb(null, true);
+        cb(null, '1');
       });
       createRedis();
       const actual = await redis.get('somekey');
 
-      assert.equal(actual, true);
+      assert.equal(actual, '1');
     });
-    it('should work for non-primes', async function() {
+    it('should work for false values', async function() {
       client.get.callsFake((key, cb) => {
         assert.equal(key, 'somekey');
-        cb(null, false);
+        cb(null, '0');
       });
       createRedis();
       const actual = await redis.get('somekey');
 
-      assert.equal(actual, false);
+      assert.equal(actual, '0');
     });
   });
 });

@@ -112,14 +112,14 @@ describe('main', function() {
       });
       it('should broadcast when the target is correct', function() {
         constructClient();
-        client.onMessage('100');
+        client.onMessage(JSON.stringify({type: 'target', number: 100}));
         client.broadcast({type: 'result', number: 100, isPrime: false});
 
         assert.ok(ws.send.called);
       });
       it('should not broadcast when the target is incorrect', function() {
         constructClient();
-        client.onMessage('113');
+        client.onMessage(JSON.stringify({type: 'target', number: 113}));
         client.broadcast({type: 'result', number: 100, isPrime: false});
 
         assert.ok(ws.send.notCalled);
@@ -129,25 +129,25 @@ describe('main', function() {
     describe('#onMessage()', function () {
       it('should not broadcast if not in cache', async function() {
         constructClient();
-        await client.onMessage('111');
+        await client.onMessage(JSON.stringify({type: 'target', number: 111}));
 
         assert.ok(ws.send.notCalled);
       });
       it('should broadcast correct value from cache for primes', async function() {
-        cache.exists.withArgs('113').returns(Promise.resolve(true));
-        cache.get.withArgs('113').returns(Promise.resolve('1'));
+        cache.exists.withArgs(113).returns(Promise.resolve(true));
+        cache.get.withArgs(113).returns(Promise.resolve('1'));
         constructClient();
-        await client.onMessage('113');
+        await client.onMessage(JSON.stringify({type: 'target', number: 113}));
 
         assert.ok(ws.send.calledOnce);
         const out = ws.send.firstCall.args[0];
         assert.deepEqual(JSON.parse(out), {type: 'result', number: 113, isPrime: true});
       });
       it('should broadcast correct value from cache for non-primes', async function() {
-        cache.exists.withArgs('112').returns(Promise.resolve(true));
-        cache.get.withArgs('112').returns(Promise.resolve('0'));
+        cache.exists.withArgs(112).returns(Promise.resolve(true));
+        cache.get.withArgs(112).returns(Promise.resolve('0'));
         constructClient();
-        await client.onMessage('112');
+        await client.onMessage(JSON.stringify({type: 'target', number: 112}));
 
         assert.ok(ws.send.calledOnce);
         const out = ws.send.firstCall.args[0];

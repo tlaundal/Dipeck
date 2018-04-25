@@ -97,12 +97,13 @@ describe('frontend', function() {
         primeResultListener.target = data.target;
         primeResultListener.doHandshake();
 
-        assert.ok(
-          primeResultListener.socket.send.withArgs(data.target.toString()).calledOnce);
+        assert.ok(primeResultListener.socket.send.calledOnce);
+        const call = primeResultListener.socket.send.firstCall.args[0];
+        assert.deepEqual(JSON.parse(call), data.packet);
       }, [
-        ['target'],
-        [123],
-        [0]
+        ['target', 'packet'],
+        [123, {type: 'target', number: 123}],
+        [0, {type: 'target', number: 0}]
       ]);
     });
 
