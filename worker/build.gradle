@@ -4,6 +4,10 @@ plugins {
 }
 mainClassName = 'io.totokaka.dipeck.worker.DipeckWorker'
 
+repositories {
+    jcenter()
+}
+
 dependencies {
     compile 'com.google.guava:guava:23.0'
     compile 'com.rabbitmq:amqp-client:5.2.0'
@@ -14,6 +18,9 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-repositories {
-    jcenter()
+test {
+    reports {
+        junitXml.enabled = true
+        html.enabled = false
+    }
 }

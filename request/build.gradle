@@ -1,0 +1,25 @@
+def sources = "dipeck_request"
+def tests = "tests"
+
+task clean(type: Delete) {
+  delete buildDir
+}
+
+task pytest(type: Exec) {
+  inputs.dir sources
+  inputs.dir tests
+
+  def reportPath = "${buildDir}/test-results/test/TEST-${project.name}.xml"
+
+  outputs.file reportPath
+
+  workingDir projectDir
+  executable "bash"
+  args "-c", """source ./env/bin/activate && \\
+                pytest --junitxml=${reportPath}"""
+}
+
+
+task test {
+  dependsOn pytest
+}
