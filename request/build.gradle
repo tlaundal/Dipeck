@@ -1,11 +1,32 @@
 def sources = "dipeck_request"
 def tests = "tests"
+def virtualenv = "env"
+def python = "python3.5"
 
 task clean(type: Delete) {
   delete buildDir
+  delete virtualenv
 }
 
-task pytest(type: Exec) {
+task venv(type: Exec) {
+  outputs.dir virtualenv
+
+  workingDir projectDir
+  executable python
+  args "-m", "venv", virtualenv
+}
+
+task pipDependencies(type: Exec, dependsOn: venv) {
+  inputs.file "requirements.txt"
+  outputs.dir "${virtualenv}/lib/${python}/site-packages" // TODO - Is a hack
+
+  workingDir projectDir
+  executable "bash"
+  args "-c", """source ./${virtualenv}/bin/activate && \\
+                pip install -r requirements.txt"""
+}
+
+task pytest(type: Exec, dependsOn: pipDependencies) {
   inputs.dir sources
   inputs.dir tests
 
@@ -15,11 +36,9 @@ task pytest(type: Exec) {
 
   workingDir projectDir
   executable "bash"
-  args "-c", """source ./env/bin/activate && \\
+  args "-c", """source ./${virtualenv}/bin/activate && \\
                 pytest --junitxml=${reportPath}"""
 }
 
 
-task test {
-  dependsOn pytest
-}
+task test (dependsOn: pytest)
