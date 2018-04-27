@@ -48,9 +48,9 @@ jobs:
       before_install:
         - cd $COMPONENT
       install:
-        - ./gradlew assemble
+        - ../gradlew assemble
       script:
-        - ./gradlew check
+        - ../gradlew check
     - language: node_js
       node_js:
         - "9.11"
