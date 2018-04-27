@@ -45,12 +45,10 @@ jobs:
       jdk: openjdk8
       env:
         - COMPONENT=worker
-      before_install:
-        - cd $COMPONENT
       install:
-        - ../gradlew assemble
+        - ./gradlew :dipeck_worker:assemble
       script:
-        - ../gradlew check
+        - ./gradlew :dipeck_worker:check
     - language: node_js
       node_js:
         - "9.11"
