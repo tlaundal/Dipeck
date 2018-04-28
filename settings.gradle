@@ -2,6 +2,10 @@ rootProject.name = 'dipeck'
 
 include 'worker'
 include 'request'
+include 'notification'
+include 'frontend'
 
 project(":worker").name = "dipeck_worker"
 project(":request").name = "dipeck_request"
+project(":notification").name = "dipeck_notification"
+project(":frontend").name = "dipeck_frontend"

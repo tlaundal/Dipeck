@@ -1,0 +1,4 @@
+ext.sources = "src"
+ext.tests = "test"
+
+ext.nodejs = true

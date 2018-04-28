@@ -1,0 +1,93 @@
+allprojects {
+  ext.nodejs = false
+}
+
+/**
+ * Configure node projects with a default config.
+ */
+allprojects { afterEvaluate { project -> if (project.nodejs) {
+  task cleanWorkspace(type: Delete) {
+    delete "node_modules"
+  }
+
+  task clean(type: Delete) {
+    delete buildDir
+  }
+
+  task npmDependencies(type: Exec) {
+    inputs.file "package.json"
+    outputs.dir "node_modules"
+    outputs.file "package-lock.json"
+
+    executable "npm"
+    args "install"
+  }
+
+  task mocha(type: Exec, dependsOn: npmDependencies) {
+    inputs.dir sources
+    inputs.dir tests
+
+    def reportPath = "${buildDir}/test-results/test/TEST-${project.name}.xml"
+
+    outputs.file reportPath
+
+    executable "./node_modules/.bin/mocha"
+    args "test",
+         "--reporter", "mocha-junit-reporter",
+         "--reporter-options", "mochaFile=${reportPath}"
+  }
+
+  task test (dependsOn: mocha)
+} } }
+
+task clean(type: Delete) {
+  delete buildDir
+}
+
+task collectReports(type: Copy) {
+  include "TEST-*.xml"
+
+  def reports = []
+  subprojects.each { child ->
+    from("${child.buildDir}/test-results/test")
+
+    child.afterEvaluate {
+      dependsOn child.tasks.test
+    }
+  }
+
+  into "${buildDir}/test-reports/collected/"
+}
+
+task combineReports(dependsOn: collectReports) {
+  def output = file("${buildDir}/test-reports/combined.xml")
+  inputs.dir "${buildDir}/test-reports/collected/"
+  outputs.file "${buildDir}/test-reports/combined.xml"
+
+  doLast {
+    def slurper = new XmlSlurper()
+    def suites = slurper.parseText """
+      <testsuites name="Dipeck tests">
+      </testsuites>
+    """
+    Arrays.stream(file("${buildDir}/test-reports/collected/").listFiles())
+        .map(slurper.&parse)
+        .flatMap { document ->
+          document.testsuite.size() > 0 ? document.testsuite.list().stream() : java.util.stream.Stream.of(document)
+        }
+        .filter { suite ->
+          suite.testcase.size() > 0
+        }
+        .forEach(suites.&appendNode)
+    output.text = new groovy.xml.StreamingMarkupBuilder().bind { mkp.yield suites }.toString()
+  }
+}
+
+task renderReport(type: Exec, dependsOn: combineReports) {
+  inputs.file "${buildDir}/test-reports/combined.xml"
+  outputs.file "${buildDir}/test-reports/report.html"
+
+  executable "xunit-viewer"
+  args "--results=./build/test-reports/combined.xml",  "--output=./build/test-reports/report.html"
+
+}
