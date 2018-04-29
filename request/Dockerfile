@@ -11,7 +11,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 RUN pip install --no-cache-dir .
 
-# ENV FLASK_APP app
 EXPOSE 5000
 
 CMD ["uwsgi", "uwsgi.ini"]
+
+HEALTHCHECK --interval=5s \
+  CMD ./healthcheck.py
