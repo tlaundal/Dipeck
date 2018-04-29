@@ -47,11 +47,11 @@ task clean(type: Delete) {
 task collectReports(type: Copy) {
   include "TEST-*.xml"
 
-  def reports = []
   subprojects.each { child ->
     from("${child.buildDir}/test-results/test")
 
     child.afterEvaluate {
+      // Set a dependency from collectReports to this child's test task
       dependsOn child.tasks.test
     }
   }
@@ -62,24 +62,23 @@ task collectReports(type: Copy) {
 task combineReports(dependsOn: collectReports) {
   def output = file("${buildDir}/test-reports/combined.xml")
   inputs.dir "${buildDir}/test-reports/collected/"
-  outputs.file "${buildDir}/test-reports/combined.xml"
+  outputs.file output
 
   doLast {
     def slurper = new XmlSlurper()
-    def suites = slurper.parseText """
-      <testsuites name="Dipeck tests">
-      </testsuites>
-    """
-    Arrays.stream(file("${buildDir}/test-reports/collected/").listFiles())
+
+    new groovy.xml.StreamingMarkupBuilder().bind {
+      mkp.yield file("${buildDir}/test-reports/collected/").listFiles()
+        .toList().stream()
         .map(slurper.&parse)
-        .flatMap { document ->
-          document.testsuite.size() > 0 ? document.testsuite.list().stream() : java.util.stream.Stream.of(document)
-        }
-        .filter { suite ->
-          suite.testcase.size() > 0
-        }
-        .forEach(suites.&appendNode)
-    output.text = new groovy.xml.StreamingMarkupBuilder().bind { mkp.yield suites }.toString()
+        // Flatten files with multiple testsuites
+        .flatMap({ it?.testsuite.list().stream() ?: [it].stream() })
+        // Only testsuites with testcases
+        .filter({ !!it.testcase.size() })
+        .collect({
+          slurper.parseText '<testsuites name="Dipeck tests"></testsuites>'
+        }, { a, b -> a.appendNode(b); a }, {})
+    }.writeTo(output.newWriter())
   }
 }
 
@@ -88,6 +87,6 @@ task renderReport(type: Exec, dependsOn: combineReports) {
   outputs.file "${buildDir}/test-reports/report.html"
 
   executable "xunit-viewer"
-  args "--results=./build/test-reports/combined.xml",  "--output=./build/test-reports/report.html"
-
+  args "--results=./build/test-reports/combined.xml",
+       "--output=./build/test-reports/report.html"
 }
