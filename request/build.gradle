@@ -37,7 +37,7 @@ task pytest(type: Exec, dependsOn: pipDependencies) {
 
   executable "bash"
   args "-c", """source ./${virtualenv}/bin/activate && \\
-                pytest --junitxml=${reportPath}"""
+                pytest -q --junitxml=${reportPath}"""
 }
 
 
