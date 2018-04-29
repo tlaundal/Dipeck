@@ -7,10 +7,14 @@ import com.rabbitmq.client.Envelope;
 import io.totokaka.dipeck.worker.handling.MessageHandler;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Answers;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class MessageConsumerTest {
@@ -56,5 +60,35 @@ public class MessageConsumerTest {
         consumer.handleDelivery("tag", envelope, mock(AMQP.BasicProperties.class), TASK);
 
         verify(handler).handle(113L);
+    }
+
+    @Test
+    public void testCheckHealthWithoutRuns() throws IOException {
+        consumer.handleDelivery("tag", envelope, mock(AMQP.BasicProperties.class), TASK);
+        assertTrue(consumer.checkHealth());
+    }
+
+    @Test
+    public void testCheckHealthWhenRunning() throws InterruptedException {
+        Object lock = new Object();
+        doAnswer(invocation -> {
+            synchronized (lock) {
+                lock.notify();
+            }
+            Thread.sleep(10);
+            return null;
+        }).when(handler).handle(anyLong());
+        new Thread(() -> {
+            try {
+                consumer.handleDelivery("tag", envelope, mock(AMQP.BasicProperties.class), TASK);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
+        synchronized (lock) {
+            lock.wait();
+        }
+
+        assertTrue(consumer.checkHealth());
     }
 }

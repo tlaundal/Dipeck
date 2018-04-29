@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/dipeck_worker.iml" filepath="$PROJECT_DIR$/.idea/modules/dipeck_worker.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-2052514358/dipeck.iml" filepath="$PROJECT_DIR$/.idea/modules/-2052514358/dipeck.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-893930313/dipeck_frontend.iml" filepath="$PROJECT_DIR$/.idea/modules/-893930313/dipeck_frontend.iml" group="dipeck_frontend" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-78129904/dipeck_notification.iml" filepath="$PROJECT_DIR$/.idea/modules/-78129904/dipeck_notification.iml" group="dipeck_notification" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/-555621558/dipeck_request.iml" filepath="$PROJECT_DIR$/.idea/modules/-555621558/dipeck_request.iml" group="dipeck_request" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/dipeck_worker.iml" filepath="$PROJECT_DIR$/.idea/modules/dipeck_worker.iml" group="dipeck_worker" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/dipeck_worker_main.iml" filepath="$PROJECT_DIR$/.idea/modules/dipeck_worker_main.iml" group="dipeck_worker" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/dipeck_worker_test.iml" filepath="$PROJECT_DIR$/.idea/modules/dipeck_worker_test.iml" group="dipeck_worker" />
     </modules>

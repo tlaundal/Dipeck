@@ -25,3 +25,5 @@ ENV DIPECK_MQ_USER ''
 ENV DIPECK_MQ_PASS ''
 
 ENTRYPOINT ["/usr/var/dipeck_worker/bin/dipeck_worker"]
+HEALTHCHECK --interval=5s \
+  CMD /usr/src/dipeck_worker/healthcheck.sh

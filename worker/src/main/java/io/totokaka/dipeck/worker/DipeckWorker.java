@@ -5,6 +5,9 @@ import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 import io.totokaka.dipeck.worker.handling.MessageHandler;
+import io.totokaka.dipeck.worker.health.HealthChecked;
+import io.totokaka.dipeck.worker.health.HealthEndpoint;
+import io.totokaka.dipeck.worker.health.JedisHealthChecker;
 import io.totokaka.dipeck.worker.service.Cache;
 import io.totokaka.dipeck.worker.service.MessageConsumer;
 import io.totokaka.dipeck.worker.service.Publisher;
@@ -15,6 +18,8 @@ import redis.clients.jedis.exceptions.JedisException;
 
 import java.io.IOException;
 import java.net.ConnectException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,6 +49,9 @@ public class DipeckWorker {
             return;
         }
 
+        Set<HealthChecked> healthCheckers = new HashSet<>();
+        healthCheckers.add(messageQueue.getConnection()::isOpen);
+
         Cache cache;
         Publisher publisher;
         try {
@@ -51,6 +59,7 @@ public class DipeckWorker {
 
             cache = new Cache(jedisPool);
             publisher = new Publisher(jedisPool, logger, new Gson());
+            healthCheckers.add(new JedisHealthChecker(jedisPool));
         } catch (JedisException ex) {
             logger.log(Level.SEVERE, "Error while connecting to Redis", ex);
             System.exit(2);
@@ -60,6 +69,17 @@ public class DipeckWorker {
 
         MessageHandler handler = new MessageHandler(logger, cache, publisher);
         MessageConsumer consumer = new MessageConsumer(messageQueue, handler, logger, new Gson());
+        healthCheckers.add(consumer);
+
+        HealthEndpoint healthEndpoint = new HealthEndpoint(healthCheckers);
+        try {
+            healthEndpoint.start();
+            logger.info("Health endpoint running at http://127.0.0.1:1109/");
+        } catch (IOException e) {
+            logger.log(Level.SEVERE, "Could not start health endpoint", e);
+            System.exit(1);
+            return;
+        }
 
         try {
             logger.info("Waiting for tasks");

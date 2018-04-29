@@ -13,6 +13,7 @@ dependencies {
     compile 'com.rabbitmq:amqp-client:5.2.0'
     compile 'redis.clients:jedis:2.9.0'
     compile 'com.google.code.gson:gson:2.8.2'
+    compile 'org.nanohttpd:nanohttpd:2.2.0'
 
     testCompile "org.mockito:mockito-core:2.+"
     testCompile 'junit:junit:4.12'

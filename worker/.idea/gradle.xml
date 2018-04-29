@@ -8,6 +8,10 @@
         <option name="gradleJvm" value="1.8" />
         <option name="modules">
           <set>
+            <option value="$PROJECT_DIR$/.." />
+            <option value="$PROJECT_DIR$/../frontend" />
+            <option value="$PROJECT_DIR$/../notification" />
+            <option value="$PROJECT_DIR$/../request" />
             <option value="$PROJECT_DIR$" />
           </set>
         </option>
