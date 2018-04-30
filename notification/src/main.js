@@ -33,11 +33,15 @@ class DipeckNotification {
     }
 
     const packet = JSON.parse(message);
-    if (packet.type !== 'result') {
-      this.logger.warn(`Received packet of uknown kind: ${message}`);
-      return;
+    switch (packet.type) {
+    case 'result':
+      return this.handleResult(packet);
+    default:
+      return this.logger.warn(`Received packet of uknown kind: ${message}`);
     }
+  }
 
+  handleResult(packet) {
     this.logger.info(`Recieved result: ${packet.number} is prime: ${packet.isPrime}`);
     for (let client of this.clients) {
       client.broadcast(packet);
@@ -56,14 +60,20 @@ class Client {
   }
 
   async onMessage(message) {
-    this.logger.info(`[${this.id}] Looking for: ${message}`);
-
     const packet = JSON.parse(message);
-    if (packet.type !== 'target') {
-      return;
+    switch (packet.type) {
+    case 'target':
+      return this.handleTarget(packet);
+    case 'status':
+      return this.handleStatus(packet);
+    default:
+      return this.logger.warn(`Recieved uknown ws packet: ${packet}`);
     }
+  }
 
+  async handleTarget(packet) {
     this.lookingFor = packet.number;
+    this.logger.info(`[${this.id}] Looking for: ${this.lookingFor}`);
     if (await this.cache.exists(this.lookingFor)) {
       const isPrime = !!parseInt(await this.cache.get(this.lookingFor));
       this.logger.info(`[${this.id}] Using cached result`);
@@ -73,6 +83,14 @@ class Client {
         isPrime
       });
     }
+  }
+
+  async handleStatus() {
+    const pong = await this.cache.ping();
+    this.ws.send(JSON.stringify({
+      type: 'status',
+      healthy: pong
+    }));
   }
 
   broadcast(packet) {

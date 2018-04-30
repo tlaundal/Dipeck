@@ -32,6 +32,10 @@ class Redis {
     return await this.client.get(key.toString());
   }
 
+  async ping() {
+    return await this.client.ping();
+  }
+
 }
 
 module.exports = Redis;

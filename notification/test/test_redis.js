@@ -86,4 +86,12 @@ describe('Redis', function() {
       assert.equal(actual, '0');
     });
   });
+  describe('#ping()', function() {
+    it('should call through', async function () {
+      createRedis();
+      await redis.ping();
+
+      assert.ok(client.ping.called);
+    });
+  });
 });

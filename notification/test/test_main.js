@@ -127,7 +127,7 @@ describe('main', function() {
 
         assert.ok(ws.send.notCalled);
       });
-      it('should broadcast correct value from cache for primes', async function() {
+      it('should broadcast correct value from cache for prime results', async function() {
         cache.exists.withArgs(113).returns(Promise.resolve(true));
         cache.get.withArgs(113).returns(Promise.resolve('1'));
         constructClient();
@@ -137,7 +137,7 @@ describe('main', function() {
         const out = ws.send.firstCall.args[0];
         assert.deepEqual(JSON.parse(out), {type: 'result', number: 113, isPrime: true});
       });
-      it('should broadcast correct value from cache for non-primes', async function() {
+      it('should broadcast correct value from cache for non-prime results', async function() {
         cache.exists.withArgs(112).returns(Promise.resolve(true));
         cache.get.withArgs(112).returns(Promise.resolve('0'));
         constructClient();
@@ -146,6 +146,15 @@ describe('main', function() {
         assert.ok(ws.send.calledOnce);
         const out = ws.send.firstCall.args[0];
         assert.deepEqual(JSON.parse(out), {type: 'result', number: 112, isPrime: false});
+      });
+      it('should return health correctly', async function() {
+        cache.ping.returns(true);
+        constructClient();
+        await client.onMessage(JSON.stringify({type: 'status'}));
+
+        assert.ok(ws.send.calledOnce);
+        const out = ws.send.firstCall.args[0];
+        assert.deepEqual(JSON.parse(out), {type: 'status', healthy: true});
       });
     });
   });
