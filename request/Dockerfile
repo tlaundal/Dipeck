@@ -15,5 +15,4 @@ EXPOSE 5000
 
 CMD ["uwsgi", "uwsgi.ini"]
 
-HEALTHCHECK --interval=5s \
-  CMD ./healthcheck.py
+HEALTHCHECK CMD ./healthcheck.py
