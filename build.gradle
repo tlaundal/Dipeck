@@ -13,6 +13,10 @@ subprojects { afterEvaluate { project -> if (project.compose) {
     args "build", project.compose
   }
 
+  if (!project.tasks.findByName('assemble')) {
+    task assemble(dependsOn: composeBuild)
+  }
+
   task composeUp(type: Exec) {
     dependsOn composeBuild
 
@@ -92,6 +96,10 @@ subprojects { afterEvaluate { project -> if (project.nodejs) {
 
   if (!project.tasks.findByName('test')) {
     task test (dependsOn: mocha)
+  }
+
+  if (!project.tasks.findByName('check')) {
+    task check (dependsOn: test)
   }
 } } }
 

@@ -42,6 +42,9 @@ task pytest(type: Exec, dependsOn: pipDependencies) {
 
 
 task test (dependsOn: pytest)
+task check (dependsOn: test)
+task assemble (dependsOn: pipDependencies)
+
 
 ext.compose = "request"
 afterEvaluate {

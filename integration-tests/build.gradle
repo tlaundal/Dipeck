@@ -16,4 +16,5 @@ afterEvaluate {
   }
 
   task integrationTest(dependsOn: mocha)
+  check.dependsOn integrationTest
 }

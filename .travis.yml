@@ -1,65 +1,15 @@
-jobs:
-  # We have to put our configurations here, so we can separate the directories
-  include:
-    - language: node_js
-      node_js:
-        - "9.11"
-      env:
-        - COMPONENT=frontend
-      cache:
-        directories:
-          - "frontend/node_modules"
-      before_install:
-        - cd $COMPONENT
-      script:
-        - npm run lint
-        - npm test
-    - language: node_js
-      node_js:
-        - "9.11"
-      env:
-        - COMPONENT=notification
-      cache:
-        directories:
-          - "$COMPONENT/node_modules"
-      before_install:
-        - cd $COMPONENT
-      script:
-        - npm run lint
-        - npm test
-    - language: python
-      python:
-        - "3.6"
-      env:
-        - COMPONENT=request
-      cache: pip
-      before_install:
-        - cd $COMPONENT
-      install:
-        - pip install -r requirements.txt
-        - pip install flake8
-      script:
-        - flake8
-        - python -m unittest
-    - language: java
-      jdk: openjdk8
-      env:
-        - COMPONENT=worker
-      install:
-        - ./gradlew :dipeck_worker:assemble
-      script:
-        - ./gradlew :dipeck_worker:check
-    - language: node_js
-      node_js:
-        - "9.11"
-      sudo: required
-      services:
-        - docker
-      env:
-        - COMPONENT=integration-tests
-      cache:
-        directories:
-          - "$COMPONENT/node_modules"
-      before_install:
-        - docker-compose --version
-        - cd $COMPONENT
+sudo: required
+services:
+  - docker
+cache:
+  directories:
+    - frontend/node_modules
+    - integration-tests/node_modules
+    - notification/node_modules
+    - request/env
+    - .gradle
+
+install:
+  - ./gradlew assemble
+script:
+  - ./gradlew check
