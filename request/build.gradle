@@ -1,7 +1,7 @@
 def sources = "dipeck_request"
 def tests = "tests"
 def virtualenv = "env"
-def python = "python3.5"
+def python = "python3"
 
 task cleanWorkspace(type: Delete) {
   delete virtualenv

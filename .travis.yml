@@ -9,6 +9,8 @@ cache:
     - request/env
     - .gradle
 
+before_install:
+  - python3 --version
 install:
   - ./gradlew assemble
 script:
