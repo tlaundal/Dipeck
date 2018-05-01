@@ -42,3 +42,12 @@ task pytest(type: Exec, dependsOn: pipDependencies) {
 
 
 task test (dependsOn: pytest)
+
+ext.compose = "request"
+ext.registerComposeInputs = {
+  inputs.file "healthcheck.py"
+  inputs.file "requirements.txt"
+  inputs.file "setup.py"
+  inputs.file "uwsgi.ini"
+  inputs.dir "dipeck_request/"
+}

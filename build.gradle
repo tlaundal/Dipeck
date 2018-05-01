@@ -1,11 +1,64 @@
 allprojects {
   ext.nodejs = false
+  ext.compose = false
+}
+
+task clean(type: Delete) {
+  delete buildDir
+}
+
+subprojects { afterEvaluate { project -> if (project.compose) {
+  task composeBuild(type: Exec) {
+    delegate.with project.registerComposeInputs
+
+    executable "docker-compose"
+    args "build", project.compose
+  }
+
+  task composeUp(type: Exec) {
+    dependsOn composeBuild
+
+    executable "docker-compose"
+    args "up", "-d", project.compose
+  }
+
+  task composeStop(type: Exec) {
+    mustRunAfter composeUp
+
+    executable "docker-compose"
+    args "stop", project.compose
+  }
+
+  task composeDown(type: Exec) {
+    dependsOn composeStop
+
+    executable "docker-compose"
+    args "rm", "-f", "-v", project.compose
+  }
+}}}
+
+task composeDown(type: Exec) {
+  subprojects.each { child -> child.afterEvaluate { if (child.compose) {
+    dependsOn child.tasks.composeDown
+  } } }
+
+  executable "docker-compose"
+  args "down"
+}
+
+task composeUpFreshVolumes(type: Exec) {
+  subprojects.each { child -> child.afterEvaluate { if (child.compose) {
+    dependsOn child.tasks.composeBuild
+  }}}
+
+  executable "docker-compose"
+  args "up", "-d", "--renew-anon-volumes"
 }
 
 /**
  * Configure node projects with a default config.
  */
-allprojects { afterEvaluate { project -> if (project.nodejs) {
+subprojects { afterEvaluate { project -> if (project.nodejs) {
   task cleanWorkspace(type: Delete) {
     delete "node_modules"
   }
@@ -43,10 +96,6 @@ allprojects { afterEvaluate { project -> if (project.nodejs) {
     task test (dependsOn: mocha)
   }
 } } }
-
-task clean(type: Delete) {
-  delete buildDir
-}
 
 task collectReports(type: Copy) {
   include "TEST-*.xml"
