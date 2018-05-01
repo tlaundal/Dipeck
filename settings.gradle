@@ -4,6 +4,7 @@ include 'worker'
 include 'request'
 include 'notification'
 include 'frontend'
+include 'integration-tests'
 
 project(":worker").name = "dipeck_worker"
 project(":request").name = "dipeck_request"

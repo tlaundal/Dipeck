@@ -1,0 +1,12 @@
+ext.sources = null
+ext.tests = "test"
+
+ext.nodejs = true
+
+// We define an empty test task, so it isn't overriden by a task that runs our
+// integration tests
+task test {}
+
+afterEvaluate {
+  task integrationTest(dependsOn: mocha)
+}

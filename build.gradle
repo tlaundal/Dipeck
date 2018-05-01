@@ -24,7 +24,9 @@ allprojects { afterEvaluate { project -> if (project.nodejs) {
   }
 
   task mocha(type: Exec, dependsOn: npmDependencies) {
-    inputs.dir sources
+    if (sources) {
+      inputs.dir sources
+    }
     inputs.dir tests
 
     def reportPath = "${buildDir}/test-results/test/TEST-${project.name}.xml"
@@ -32,12 +34,14 @@ allprojects { afterEvaluate { project -> if (project.nodejs) {
     outputs.file reportPath
 
     executable "./node_modules/.bin/mocha"
-    args "test",
+    args tests,
          "--reporter", "mocha-junit-reporter",
          "--reporter-options", "mochaFile=${reportPath}"
   }
 
-  task test (dependsOn: mocha)
+  if (!project.tasks.findByName('test')) {
+    task test (dependsOn: mocha)
+  }
 } } }
 
 task clean(type: Delete) {
@@ -52,7 +56,12 @@ task collectReports(type: Copy) {
 
     child.afterEvaluate {
       // Set a dependency from collectReports to this child's test task
-      dependsOn child.tasks.test
+      if (project.tasks.findByName('test')) {
+        dependsOn child.tasks.test
+      }
+      if (project.tasks.findByName('integrationTest')) {
+        mustRunAfter child.tasks.integrationTest
+      }
     }
   }
 

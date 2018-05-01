@@ -3,7 +3,7 @@ const request = require('request-promise-native');
 const compose = require('docker-composer-manager');
 const { JSDOM } = require('jsdom');
 
-const composeFile = __dirname + '/../docker-compose.yml';
+const composeFile = __dirname + '/../../docker-compose.yml';
 let address;
 
 function delay(t) {
