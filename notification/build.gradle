@@ -4,8 +4,10 @@ ext.tests = "test"
 ext.nodejs = true
 
 ext.compose = "notification"
-ext.registerComposeInputs = {
-  inputs.file "healthcheck.js"
-  inputs.file "package.json"
-  inputs.dir "src/"
+afterEvaluate {
+  composeBuild {
+    inputs.file "healthcheck.js"
+    inputs.file "package.json"
+    inputs.dir "src/"
+  }
 }

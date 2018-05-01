@@ -9,8 +9,6 @@ task clean(type: Delete) {
 
 subprojects { afterEvaluate { project -> if (project.compose) {
   task composeBuild(type: Exec) {
-    delegate.with project.registerComposeInputs
-
     executable "docker-compose"
     args "build", project.compose
   }
@@ -101,20 +99,24 @@ task collectReports(type: Copy) {
   include "TEST-*.xml"
 
   subprojects.each { child ->
-    from("${child.buildDir}/test-results/test")
+    def path = "${child.buildDir}/test-results/test"
+    inputs.dir path
+    from path
 
     child.afterEvaluate {
       // Set a dependency from collectReports to this child's test task
-      if (project.tasks.findByName('test')) {
+      if (child.tasks.findByName('test')) {
         dependsOn child.tasks.test
       }
-      if (project.tasks.findByName('integrationTest')) {
+      if (child.tasks.findByName('integrationTest')) {
         mustRunAfter child.tasks.integrationTest
       }
     }
   }
 
-  into "${buildDir}/test-reports/collected/"
+  def path = "${buildDir}/test-reports/collected/"
+  outputs.dir "${buildDir}/test-reports/collected/"
+  into path
 }
 
 task combineReports(dependsOn: collectReports) {

@@ -8,5 +8,12 @@ ext.nodejs = true
 task test {}
 
 afterEvaluate {
+  mocha {
+    dependsOn ":composeUpFreshVolumes"
+    allprojects { project -> if (project.compose) { afterEvaluate {
+      finalizedBy project.tasks.composeStop
+    } } }
+  }
+
   task integrationTest(dependsOn: mocha)
 }

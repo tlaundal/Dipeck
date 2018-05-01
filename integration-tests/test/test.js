@@ -1,42 +1,13 @@
 const assert = require('assert');
 const request = require('request-promise-native');
-const compose = require('docker-composer-manager');
 const { JSDOM } = require('jsdom');
 
-const composeFile = __dirname + '/../../docker-compose.yml';
 let address;
 
-function delay(t) {
-  return new Promise(function(resolve) {
-    setTimeout(resolve, t);
-  });
-}
-
-function log(msg) {
-  console.log(msg); // eslint-disable-line no-console
-}
-
-function getComposeArgs() {
-  if (process.env['CI']) {
-    log('Running as CI (without --renew-anon-volumes)');
-    return [];
-  } else {
-    return ['--renew-anon-volumes'];
-  }
-}
-
 before(async function startDocker() {
-  this.timeout(5 * 60 * 1000);
-  log('Starting docker.. May take a while');
-  await compose.dockerComposeUp(composeFile, getComposeArgs());
-
-  const port = await compose.dockerInspectPortOfContainer('dipeck_frontend_1');
+  const port = 80;
   const host = (process.env.DOCKER_HOST || 'localhost').split(':')[0];
   address = `${host}:${port}`;
-
-  log('Docker is up, waiting 10 extra seconds for services to settle');
-  await delay(12000);
-  log();
 });
 
 describe('dipeck', function() {
@@ -105,14 +76,5 @@ describe('dipeck', function() {
       await submit(13);
       assert.equal('13 is prime', window.document.querySelector('#is_prime_result').innerHTML);
     });
-
-
   });
-});
-
-after(async function stopDocker() {
-  this.timeout(60000);
-  log('Stopping docker...');
-  await compose.dockerComposeStop(composeFile);
-  log('Stopped');
 });

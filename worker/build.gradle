@@ -28,8 +28,10 @@ test {
 
 
 ext.compose = "worker"
-ext.registerComposeInputs = {
-  inputs.file "healthcheck.sh"
-  inputs.file "build.gradle"
-  inputs.dir "src/"
-}
+afterEvaluate { afterEvaluate {
+  composeBuild {
+    inputs.file "healthcheck.sh"
+    inputs.file "build.gradle"
+    inputs.dir "src/"
+  }
+} }

@@ -4,16 +4,18 @@ ext.tests = "test"
 ext.nodejs = true
 
 ext.compose = "frontend"
-ext.registerComposeInputs = {
-  inputs.file "healthcheck.sh"
-  inputs.file "nginx.conf"
-  inputs.file "package.json"
-  inputs.dir "src/"
-}
 afterEvaluate {
   def deps = [ "request", "notification" ].collect { ":dipeck_${it}" }
   def depsUp = deps.collect({ "${it}:composeUp" })
   def depsStop = deps.collect({ "${it}:composeStop"})
+
+  composeBuild {
+    inputs.file "healthcheck.sh"
+    inputs.file "nginx.conf"
+    inputs.file "package.json"
+    inputs.dir "src/"
+  }
+
   composeUp.dependsOn depsUp
   depsStop.collect(tasks.&getByPath).each { it.dependsOn composeStop }
 }
