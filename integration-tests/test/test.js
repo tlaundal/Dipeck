@@ -76,5 +76,11 @@ describe('dipeck', function() {
       await submit(13);
       assert.equal('13 is prime', window.document.querySelector('#is_prime_result').innerHTML);
     });
+
+    it.skip('should work with big numbers', async function() {
+      this.timeout(15000);
+      await submit(2305843009213693951);
+      assert.equal('2305843009213693951 is prime', window.document.querySelector('#is_prime_result').innerHTML);
+    });
   });
 });
