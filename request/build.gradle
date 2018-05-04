@@ -1,58 +1,19 @@
-def sources = "dipeck_request"
-def tests = "tests"
-def virtualenv = "env"
-def python = "python3"
+apply plugin: 'base'
 
-task cleanWorkspace(type: Delete) {
-  delete virtualenv
+apply from: "$rootDir/gradle/python.gradle"
+python {
+  sources = 'dipeck_request'
+  tests = 'tests'
 }
 
-task clean(type: Delete) {
-  delete buildDir
+apply from: "$rootDir/gradle/compose.gradle"
+compose {
+  service = 'request'
 }
-
-task venv(type: Exec) {
-  outputs.dir virtualenv
-
-  executable python
-  args "-m", "venv", virtualenv
-}
-
-task pipDependencies(type: Exec, dependsOn: venv) {
+composeBuild {
+  inputs.file "healthcheck.py"
   inputs.file "requirements.txt"
-  outputs.dir "${virtualenv}/lib/${python}/site-packages" // TODO - Is a hack
-
-  executable "bash"
-  args "-c", """source ./${virtualenv}/bin/activate && \\
-                pip install -r requirements.txt"""
-}
-
-task pytest(type: Exec, dependsOn: pipDependencies) {
-  inputs.dir sources
-  inputs.dir tests
-
-  def reportPath = "${buildDir}/test-results/test/TEST-${project.name}.xml"
-
-  outputs.file reportPath
-
-  executable "bash"
-  args "-c", """source ./${virtualenv}/bin/activate && \\
-                pytest -q --junitxml=${reportPath}"""
-}
-
-
-task test (dependsOn: pytest)
-task check (dependsOn: test)
-task assemble (dependsOn: pipDependencies)
-
-
-ext.compose = "request"
-afterEvaluate {
-  composeBuild {
-    inputs.file "healthcheck.py"
-    inputs.file "requirements.txt"
-    inputs.file "setup.py"
-    inputs.file "uwsgi.ini"
-    inputs.dir "dipeck_request/"
-  }
+  inputs.file "setup.py"
+  inputs.file "uwsgi.ini"
+  inputs.dir "dipeck_request/"
 }

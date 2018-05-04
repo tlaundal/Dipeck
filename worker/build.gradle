@@ -1,4 +1,5 @@
 plugins {
+    id 'base'
     id 'java'
     id 'application'
 }
@@ -15,7 +16,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.2'
     compile 'org.nanohttpd:nanohttpd:2.2.0'
 
-    testCompile "org.mockito:mockito-core:2.+"
+    testCompile 'org.mockito:mockito-core:2.+'
     testCompile 'junit:junit:4.12'
 }
 
@@ -26,12 +27,15 @@ test {
     }
 }
 
-
-ext.compose = "worker"
-afterEvaluate { afterEvaluate {
-  composeBuild {
-    inputs.file "healthcheck.sh"
-    inputs.file "build.gradle"
-    inputs.dir "src/"
+// We need to support building this subproject independently
+if (project != project.rootProject) {
+  apply from: "$rootDir/gradle/compose.gradle"
+  compose {
+      service = 'worker'
   }
-} }
+  composeBuild {
+      inputs.file 'healthcheck.sh'
+      inputs.file 'build.gradle'
+      inputs.dir 'src/'
+  }
+}

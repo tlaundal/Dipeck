@@ -1,0 +1,60 @@
+class ComposePluginExtension {
+  Project project
+
+  Object service = "${ -> project.name}"
+  List dependencies = []
+
+  ComposePluginExtension(Project project) {
+    this.project = project
+  }
+}
+
+def extension = project.extensions.create('compose', ComposePluginExtension, project)
+
+task composeBuild(type: Exec) {
+  executable "docker-compose"
+  afterEvaluate {
+    args "build", extension.service
+  }
+}
+
+task composeUp(type: Exec) {
+  dependsOn composeBuild
+
+  executable "docker-compose"
+  afterEvaluate {
+    args "up", "-d", extension.service
+  }
+}
+
+task composeStop(type: Exec) {
+  mustRunAfter composeUp
+  ignoreExitValue true
+
+  executable "docker-compose"
+  afterEvaluate {
+    args "stop", extension.service
+  }
+}
+
+task composeDown(type: Exec) {
+  dependsOn composeStop
+  ignoreExitValue true
+
+  executable "docker-compose"
+  afterEvaluate {
+    args "rm", "-f", "-v", extension.service
+  }
+}
+
+assemble.dependsOn composeBuild
+clean.dependsOn composeDown
+
+afterEvaluate {
+  def deps = extension.dependencies.collect { ":dipeck_${it}" }
+  def depsUp = deps.collect { "${it}:composeUp" }
+  def depsStop = deps.collect { "${it}:composeStop" }
+
+  composeUp.dependsOn depsUp
+  depsStop.collect(project.tasks.&getByPath).each { it.finalizedBy composeStop }
+}

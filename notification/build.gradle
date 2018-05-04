@@ -1,13 +1,17 @@
-ext.sources = "src"
-ext.tests = "test"
+apply plugin: 'base'
 
-ext.nodejs = true
+apply from: "$rootDir/gradle/node.gradle"
+node {
+  sources = 'src'
+  tests = 'test'
+}
 
-ext.compose = "notification"
-afterEvaluate {
-  composeBuild {
-    inputs.file "healthcheck.js"
-    inputs.file "package.json"
-    inputs.dir "src/"
-  }
+apply from: "$rootDir/gradle/compose.gradle"
+compose {
+  service = 'notification'
+}
+composeBuild {
+  inputs.file "healthcheck.js"
+  inputs.file "package.json"
+  inputs.dir "src/"
 }

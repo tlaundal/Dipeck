@@ -1,20 +1,25 @@
-ext.sources = null
-ext.tests = "test"
+apply plugin: 'base'
 
-ext.nodejs = true
-
-// We define an empty test task, so it isn't overriden by a task that runs our
-// integration tests
-task test {}
-
-afterEvaluate {
-  mocha {
-    dependsOn ":composeUpFreshVolumes"
-    allprojects { project -> if (project.compose) { afterEvaluate {
-      finalizedBy project.tasks.composeStop
-    } } }
-  }
-
-  task integrationTest(dependsOn: mocha)
-  check.dependsOn integrationTest
+apply from: "$rootDir/gradle/node.gradle"
+node {
+  tests = 'test'
 }
+mocha {
+  dependsOn ":composeUpFreshVolumes"
+  allprojects.each { child -> child.afterEvaluate {
+    def childTask = child.tasks.findByPath "composeStop"
+    if (childTask) {
+      finalizedBy childTask
+    }
+  } }
+
+  doFirst {
+    sleep(10 * 1000)
+  }
+}
+
+task integrationTest(dependsOn: mocha)
+
+tasks.remove(test)
+
+check.dependsOn tasks.integrationTest

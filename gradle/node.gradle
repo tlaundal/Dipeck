@@ -1,0 +1,50 @@
+class NodePluginExtension {
+    Project project
+
+    String sources = null
+    String tests = null
+    Object reportPath = "${ -> project.buildDir}/test-results/test/TEST-${ -> project.name}.xml"
+
+    NodePluginExtension(Project project) {
+      this.project = project;
+    }
+}
+
+def extension = project.extensions.create('node', NodePluginExtension, project)
+
+task cleanWorkspace(type: Delete) {
+  delete "node_modules"
+}
+
+task npmDependencies(type: Exec) {
+  inputs.file "package.json"
+  outputs.dir "node_modules"
+  outputs.file "package-lock.json"
+
+  executable "npm"
+  args "install"
+}
+
+task mocha(type: Exec, dependsOn: npmDependencies) {
+  executable "./node_modules/.bin/mocha"
+
+  afterEvaluate {
+    if (extension.sources) {
+      inputs.dir extension.sources
+    }
+    if (extension.tests) {
+      inputs.dir extension.tests
+    }
+
+    outputs.file extension.reportPath
+
+    args extension.tests,
+         "--reporter", "mocha-junit-reporter",
+         "--reporter-options", "mochaFile=${extension.reportPath}"
+  }
+}
+
+task test(dependsOn: mocha)
+
+assemble.dependsOn npmDependencies
+check.dependsOn test

@@ -1,0 +1,64 @@
+class PythonPluginExtension {
+  Project project
+
+  String sources = null
+  String tests = null
+  Object reportPath = "${ -> project.buildDir}/test-results/test/TEST-${ -> project.name}.xml"
+  String virtualenv = 'env'
+  String python = 'python3'
+
+  PythonPluginExtension(Project project) {
+    this.project = project
+  }
+}
+
+def extension = project.extensions.create('python', PythonPluginExtension, project)
+
+task cleanWorkspace(type: Delete) {
+  afterEvaluate {
+    delete extension.virtualenv
+  }
+}
+
+task venv(type: Exec) {
+  afterEvaluate {
+    outputs.dir extension.virtualenv
+
+    executable extension.python
+    args "-m", "venv", extension.virtualenv
+  }
+}
+
+task pipDependencies(type: Exec, dependsOn: venv) {
+  inputs.file "requirements.txt"
+  executable "bash"
+
+  afterEvaluate {
+    // The following is a hack, but seems to work
+    outputs.dir "${extension.virtualenv}/lib/${extension.python}/site-packages"
+
+    args "-c", """source ./${extension.virtualenv}/bin/activate && \\
+                  pip install -r requirements.txt"""
+  }
+}
+
+task test(type: Exec, dependsOn: pipDependencies) {
+  executable "bash"
+
+  afterEvaluate {
+    if (extension.sources) {
+      inputs.dir extension.sources
+    }
+    if (extension.tests) {
+      inputs.dir extension.tests
+    }
+
+    outputs.file extension.reportPath
+
+    args "-c", """source ./${extension.virtualenv}/bin/activate && \\
+                  pytest -q --junitxml=${extension.reportPath}"""
+  }
+}
+
+check.dependsOn test
+assemble.dependsOn pipDependencies
