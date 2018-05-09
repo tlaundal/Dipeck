@@ -4,8 +4,6 @@ class PythonPluginExtension {
   String sources = null
   String tests = null
   Object reportPath = "${ -> project.buildDir}/test-results/test/TEST-${ -> project.name}.xml"
-  String virtualenv = 'env'
-  String python = 'python3'
 
   PythonPluginExtension(Project project) {
     this.project = project
@@ -14,30 +12,37 @@ class PythonPluginExtension {
 
 def extension = project.extensions.create('python', PythonPluginExtension, project)
 
-task cleanWorkspace(type: Delete) {
-  afterEvaluate {
-    delete extension.virtualenv
+apply plugin: "com.jetbrains.python.envs"
+envs {
+  bootstrapDirectory = file("${projectDir}/.gradle/envs-bootstrap")
+  envsDirectory = file("${buildDir}/envs")
+
+  python "python36", "3.6.5"
+  virtualenv "envPython36", "python36", [ 'pip' ]
+}
+afterEvaluate {
+  install_python_build {
+    doFirst {
+      file("${buildDir}").mkdir()
+    }
   }
 }
 
-task venv(type: Exec) {
+def env = "${buildDir}/envs/envPython36/"
+
+task pipDependencies(type: Exec) {
   afterEvaluate {
-    outputs.dir extension.virtualenv
-
-    executable extension.python
-    args "-m", "venv", extension.virtualenv
+    dependsOn tasks.build_envs
   }
-}
-
-task pipDependencies(type: Exec, dependsOn: venv) {
   inputs.file "requirements.txt"
   executable "bash"
 
+
   afterEvaluate {
     // The following is a hack, but seems to work
-    outputs.dir "${extension.virtualenv}/lib/${extension.python}/site-packages"
+    outputs.dir "${env}/lib/python3.6/site-packages/"
 
-    args "-c", """source ./${extension.virtualenv}/bin/activate && \\
+    args "-c", """source ${env}/bin/activate && \\
                   pip install -r requirements.txt"""
   }
 }
@@ -55,7 +60,7 @@ task test(type: Exec, dependsOn: pipDependencies) {
 
     outputs.file extension.reportPath
 
-    args "-c", """source ./${extension.virtualenv}/bin/activate && \\
+    args "-c", """source ${env}/bin/activate && \\
                   pytest -q --junitxml=${extension.reportPath}"""
   }
 }
