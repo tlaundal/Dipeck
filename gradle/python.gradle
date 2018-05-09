@@ -18,7 +18,7 @@ envs {
   envsDirectory = file("${buildDir}/envs")
 
   python "python36", "3.6.5"
-  virtualenv "envPython36", "python36", [ 'pip' ]
+  virtualenv "envPython36", "python36"
 }
 afterEvaluate {
   install_python_build {
@@ -43,7 +43,7 @@ task pipDependencies(type: Exec) {
     outputs.dir "${env}/lib/python3.6/site-packages/"
 
     args "-c", """source ${env}/bin/activate && \\
-                  pip install -r requirements.txt"""
+                  python -m pip install -r requirements.txt"""
   }
 }
 
