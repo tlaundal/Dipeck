@@ -117,12 +117,12 @@ public class DipeckWorker {
         logger.log(Level.INFO, "Connecting to RabbitMQ {0}@{1}:{2}",
                 new String[]{factory.getUsername(), factory.getHost(), String.valueOf(factory.getPort())});
         Connection connection = null;
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 6; i++) {
             try {
                 connection = factory.newConnection();
                 break;
             } catch (ConnectException ex) {
-                if (i == 4) {
+                if (i == 5) {
                     throw ex;
                 } else {
                     logger.warning("Failed to connect. Sleeping for " + (i + 2) + " seconds before retrying");
