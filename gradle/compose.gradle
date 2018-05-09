@@ -11,7 +11,10 @@ class ComposePluginExtension {
 
 def extension = project.extensions.create('compose', ComposePluginExtension, project)
 
+def composeAvailable = { !['docker-compose', 'ps'].execute().waitFor() }
+
 task composeBuild(type: Exec) {
+  onlyIf composeAvailable
   executable "docker-compose"
   afterEvaluate {
     args "build", extension.service
@@ -28,6 +31,7 @@ task composeUp(type: Exec) {
 }
 
 task composeStop(type: Exec) {
+  onlyIf composeAvailable
   mustRunAfter composeUp
   ignoreExitValue true
 
@@ -38,6 +42,7 @@ task composeStop(type: Exec) {
 }
 
 task composeDown(type: Exec) {
+  onlyIf composeAvailable
   dependsOn composeStop
   ignoreExitValue true
 
