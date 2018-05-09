@@ -72,7 +72,7 @@ task combineReports(dependsOn: collectReports) {
         .toList().stream()
         .map(slurper.&parse)
         // Flatten files with multiple testsuites
-        .flatMap({ it?.testsuite.list().stream() ?: [it].stream() })
+        .flatMap({ it.'**'.findAll({ n -> n.name() == 'testsuite' }).stream() })
         // Only testsuites with testcases
         .filter({ !!it.testcase.size() })
         .collect({
