@@ -1,3 +1,15 @@
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    //  Used in our node script plugin
+    classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
+  }
+}
+
 apply plugin: 'base'
 
 void dependsOnChildren(Task owner, String taskName) {

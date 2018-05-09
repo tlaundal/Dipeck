@@ -1,7 +1,7 @@
 apply plugin: 'base'
 
 apply from: "$rootDir/gradle/node.gradle"
-node {
+nodeBuild {
   tests = 'test'
 }
 mocha {

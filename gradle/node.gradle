@@ -10,25 +10,28 @@ class NodePluginExtension {
     }
 }
 
-def extension = project.extensions.create('node', NodePluginExtension, project)
+def extension = project.extensions.create('nodeBuild', NodePluginExtension, project)
+
+apply plugin: "com.moowork.node"
+node {
+  version = '10.0.0'
+  npmVersion = '6.0.0'
+  download = true
+}
+
+npmInstall {
+  args = [project.projectDir]
+}
 
 task cleanWorkspace(type: Delete) {
   delete "node_modules"
 }
 
-task npmDependencies(type: Exec) {
-  inputs.file "package.json"
-  outputs.dir "node_modules"
-  outputs.file "package-lock.json"
-
-  executable "npm"
-  args "install"
+task mocha(type: NpmTask, dependsOn: npmInstall) {
+  npmCommand = [ 'run', 'test' ]
 }
-
-task mocha(type: Exec, dependsOn: npmDependencies) {
-  executable "./node_modules/.bin/mocha"
-
-  afterEvaluate {
+afterEvaluate {
+  mocha {
     if (extension.sources) {
       inputs.dir extension.sources
     }
@@ -38,13 +41,13 @@ task mocha(type: Exec, dependsOn: npmDependencies) {
 
     outputs.file extension.reportPath
 
-    args extension.tests,
+    args = [ '--', extension.tests,
          "--reporter", "mocha-junit-reporter",
-         "--reporter-options", "mochaFile=${extension.reportPath}"
+         "--reporter-options", "mochaFile=${extension.reportPath}" ]
   }
 }
 
 task test(dependsOn: mocha)
 
-assemble.dependsOn npmDependencies
+assemble.dependsOn npmInstall
 check.dependsOn test
