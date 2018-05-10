@@ -30,6 +30,19 @@ afterEvaluate {
 
 def env = "${buildDir}/envs/envPython36/"
 
+afterEvaluate {
+  build_virtual_envs {
+    doLast {
+      "ls ${env}/lib/python3.6/site-packages".execute().waitFor()
+    }
+  }
+  build_envs {
+    doLast {
+      "ls ${env}/lib/python3.6/site-packages".execute().waitFor()
+    }
+  }
+}
+
 task pipDependencies(type: Exec) {
   afterEvaluate {
     dependsOn tasks.build_envs
@@ -37,17 +50,16 @@ task pipDependencies(type: Exec) {
   inputs.file "requirements.txt"
   executable "bash"
 
+  doFirst {
+    "ls ${env}/lib/python3.6/site-packages".execute().waitFor()
+  }
 
   afterEvaluate {
     // The following is a hack, but seems to work
     outputs.dir "${env}/lib/python3.6/site-packages/"
 
     args "-c", """source ${env}/bin/activate && \\
-                  which python; \\
-                  which pip; \\
-                  head -n 1 \$(which pip); \\
-                  ls -R ${env}; \\
-                  python -m pip install -r requirements.txt"""
+                  pip install -r requirements.txt"""
   }
 }
 
