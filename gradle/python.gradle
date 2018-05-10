@@ -30,29 +30,12 @@ afterEvaluate {
 
 def env = "${buildDir}/envs/envPython36/"
 
-afterEvaluate {
-  build_virtual_envs {
-    doLast {
-      "ls ${env}/lib/python3.6/site-packages".execute().waitFor()
-    }
-  }
-  build_envs {
-    doLast {
-      "ls ${env}/lib/python3.6/site-packages".execute().waitFor()
-    }
-  }
-}
-
 task pipDependencies(type: Exec) {
   afterEvaluate {
     dependsOn tasks.build_envs
   }
   inputs.file "requirements.txt"
   executable "bash"
-
-  doFirst {
-    "ls ${env}/lib/python3.6/site-packages".execute().waitFor()
-  }
 
   afterEvaluate {
     // The following is a hack, but seems to work
