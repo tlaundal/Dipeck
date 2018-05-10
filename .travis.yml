@@ -26,8 +26,9 @@ before_install:
   - sudo apt-get install -y make build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev
 
 install:
-  - true
+  - ./gradlew --info :dipeck_request:build_envs
+  - bash -c "source ./request/build/envs/envPython36/bin/activate; which python; which pip; python -V; pip -V; cat \$(which pip); ls -l ./request/build/envs/envPython36/lib/python3.6/site-packages"
+  - ./gradlew --info assemble
 
 script:
-  - ./gradlew :dipeck_request:pipDependencies
-  - bash -c "source ./request/build/envs/envPython36/bin/activate; which python; which pip; python -V; pip -V; cat $(which pip); ls -l ./request/build/envs/envPython36/lib/python3.6/site-packages"
+  - ./gradlew --info check
