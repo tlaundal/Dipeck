@@ -43,7 +43,10 @@ task pipDependencies(type: Exec) {
     outputs.dir "${env}/lib/python3.6/site-packages/"
 
     args "-c", """source ${env}/bin/activate && \\
-                  ls ${env}/lib/python3.6/site-packages; \\
+                  which python; \\
+                  which pip; \\
+                  head -n 1 \$(which pip); \\
+                  ls -R ${env}; \\
                   python -m pip install -r requirements.txt"""
   }
 }
