@@ -29,5 +29,4 @@ install:
   - true
 
 script:
-  - ./gradlew :dipeck_request:build_envs
-  - bash -c "source ./request/build/envs/envPython36/bin/activate; which python; which pip; python -V; pip -V; cat $(which pip); ls -l ./request/build/envs/envPython36/lib/python3.6/site-packages"
+  - ./gradlew :dipeck_request:pipDependencies
