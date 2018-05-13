@@ -11,6 +11,7 @@ cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
+    - /usr/local/lib/node_modules/
     - .gradle
     - frontend/.gradle
     - frontend/node_modules
