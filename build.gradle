@@ -33,7 +33,11 @@ task composeUpFreshVolumes(type: Exec) {
   dependsOnChildren(composeUpFreshVolumes, 'composeBuild')
 
   executable "docker-compose"
-  args "up", "-d", "--renew-anon-volumes"
+  args "up", "-d"
+
+  if (!System.env.CI) {
+    args "--renew-anon-volumes"
+  }
 }
 
 task collectReports(type: Copy) {
