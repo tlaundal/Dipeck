@@ -12,56 +12,31 @@ class PythonPluginExtension {
 
 def extension = project.extensions.create('python', PythonPluginExtension, project)
 
-apply plugin: "com.jetbrains.python.envs"
-envs {
-  bootstrapDirectory = file("${projectDir}/.gradle/envs-bootstrap")
-  envsDirectory = file("${buildDir}/envs")
+apply plugin: "io.totokaka.gradle.pyenv"
 
-  python "python36", "3.6.5"
-  virtualenv "envPython36", "python36", [ 'pip' ]
-}
-afterEvaluate {
-  install_python_build {
-    doFirst {
-      file("${buildDir}").mkdir()
-    }
-  }
-}
 
-def env = "${buildDir}/envs/envPython36/"
+task pipDependencies(type: VenvExec) {
+  dependsOn createVenv
 
-task pipDependencies(type: Exec) {
-  afterEvaluate {
-    dependsOn tasks.build_envs
-  }
   inputs.file "requirements.txt"
-  executable "bash"
+  outputs.dir "${project.extensions.pyenv.environment}/lib/python3.6/site-packages/"
 
-  afterEvaluate {
-    // The following is a hack, but seems to work
-    outputs.dir "${env}/lib/python3.6/site-packages/"
-
-    args "-c", """source ${env}/bin/activate && \\
-                  pip install -r requirements.txt"""
-  }
+  executable "pip"
+  arguments 'install', '-r', 'requirements.txt'
 }
 
-task test(type: Exec, dependsOn: pipDependencies) {
-  executable "bash"
-
-  afterEvaluate {
-    if (extension.sources) {
-      inputs.dir extension.sources
-    }
-    if (extension.tests) {
-      inputs.dir extension.tests
-    }
-
-    outputs.file extension.reportPath
-
-    args "-c", """source ${env}/bin/activate && \\
-                  pytest -q --junitxml=${extension.reportPath}"""
+task test(type: VenvExec, dependsOn: pipDependencies) {
+  if (extension.sources) {
+    inputs.dir extension.sources
   }
+  if (extension.tests) {
+    inputs.dir extension.tests
+  }
+
+  outputs.file extension.reportPath
+
+  executable 'pytest'
+  arguments '-q', "--junitxml=${extension.reportPath}"
 }
 
 check.dependsOn test

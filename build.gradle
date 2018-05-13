@@ -7,7 +7,7 @@ buildscript {
   dependencies {
     //  Used in our node and python script plugins
     classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
-    classpath "gradle.plugin.com.jetbrains.python:gradle-python-envs:0.0.25"
+    classpath "gradle.plugin.io.totokaka.gradle.pyenv:gradle-pyenv:0.0.8"
   }
 }
 
